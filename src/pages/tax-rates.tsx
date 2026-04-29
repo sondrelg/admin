@@ -7,18 +7,28 @@ import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-
 interface TaxRate {
 	id: string;
 	name: string;
-	rate_bps: number;
+	eat_in_rate_bps: number;
+	take_away_rate_bps: number;
 	is_default: boolean;
 }
 
 interface TaxRateRow {
 	id: string | null;
 	name: string;
-	rateBps: number;
+	eatInRateBps: number;
+	takeAwayRateBps: number;
 	isDefault: boolean;
 	dirty: boolean;
 	isNew: boolean;
 }
+
+const rateToPercent = (bps: number) => (bps / 100).toFixed(bps % 100 === 0 ? 0 : 2);
+
+const percentToBps = (pct: string) => {
+	const num = Number.parseFloat(pct);
+	if (Number.isNaN(num)) return 0;
+	return Math.round(num * 100);
+};
 
 export function TaxRatesPage() {
 	const [rows, setRows] = createStore<TaxRateRow[]>([]);
@@ -28,14 +38,6 @@ export function TaxRatesPage() {
 	const [success, setSuccess] = createSignal<string | null>(null);
 	const [deletingId, setDeletingId] = createSignal<string | null>(null);
 
-	const rateToPercent = (bps: number) => (bps / 100).toFixed(bps % 100 === 0 ? 0 : 2);
-
-	const percentToBps = (pct: string) => {
-		const num = Number.parseFloat(pct);
-		if (Number.isNaN(num)) return 0;
-		return Math.round(num * 100);
-	};
-
 	const fetchRates = async () => {
 		const res = await customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates");
 		if (res.status === 200) {
@@ -43,7 +45,8 @@ export function TaxRatesPage() {
 				res.data.map((r) => ({
 					id: r.id,
 					name: r.name,
-					rateBps: r.rate_bps,
+					eatInRateBps: r.eat_in_rate_bps,
+					takeAwayRateBps: r.take_away_rate_bps,
 					isDefault: r.is_default,
 					dirty: false,
 					isNew: false,
@@ -59,7 +62,8 @@ export function TaxRatesPage() {
 		setRows(rows.length, {
 			id: null,
 			name: "",
-			rateBps: 2500,
+			eatInRateBps: 2500,
+			takeAwayRateBps: 2500,
 			isDefault: false,
 			dirty: true,
 			isNew: true,
@@ -105,17 +109,20 @@ export function TaxRatesPage() {
 
 		setSaving(true);
 
+		const body = {
+			name: row.name,
+			eat_in_rate_bps: row.eatInRateBps,
+			take_away_rate_bps: row.takeAwayRateBps,
+			is_default: row.isDefault,
+		};
+
 		if (row.isNew) {
 			const res = await customFetch<{
 				data: TaxRate & { error?: string; message?: string };
 				status: number;
 			}>("/api/tax-rates", {
 				method: "POST",
-				body: JSON.stringify({
-					name: row.name,
-					rate_bps: row.rateBps,
-					is_default: row.isDefault,
-				}),
+				body: JSON.stringify(body),
 			});
 
 			setSaving(false);
@@ -124,7 +131,8 @@ export function TaxRatesPage() {
 				setRows(index, {
 					id: res.data.id,
 					name: res.data.name,
-					rateBps: res.data.rate_bps,
+					eatInRateBps: res.data.eat_in_rate_bps,
+					takeAwayRateBps: res.data.take_away_rate_bps,
 					isDefault: res.data.is_default,
 					dirty: false,
 					isNew: false,
@@ -139,11 +147,7 @@ export function TaxRatesPage() {
 				status: number;
 			}>(`/api/tax-rates/${row.id}`, {
 				method: "PUT",
-				body: JSON.stringify({
-					name: row.name,
-					rate_bps: row.rateBps,
-					is_default: row.isDefault,
-				}),
+				body: JSON.stringify(body),
 			});
 
 			setSaving(false);
@@ -152,7 +156,8 @@ export function TaxRatesPage() {
 				setRows(index, {
 					id: res.data.id,
 					name: res.data.name,
-					rateBps: res.data.rate_bps,
+					eatInRateBps: res.data.eat_in_rate_bps,
+					takeAwayRateBps: res.data.take_away_rate_bps,
 					isDefault: res.data.is_default,
 					dirty: false,
 					isNew: false,
@@ -169,7 +174,8 @@ export function TaxRatesPage() {
 			<div>
 				<h2 class="text-2xl font-bold tracking-tight">VAT Rates</h2>
 				<p class="mt-1 text-sm text-muted-foreground">
-					Manage the VAT rates applied to your menu items.
+					Manage the VAT rates applied to your menu items. Rates can differ for eat-in and
+					take-away.
 				</p>
 			</div>
 
@@ -203,13 +209,25 @@ export function TaxRatesPage() {
 								</div>
 								<div class="w-28">
 									<TextField
-										value={rateToPercent(row.rateBps)}
+										value={rateToPercent(row.eatInRateBps)}
 										onChange={(v) => {
-											setRows(index(), "rateBps", percentToBps(v));
+											setRows(index(), "eatInRateBps", percentToBps(v));
 											setRows(index(), "dirty", true);
 										}}
 									>
-										<TextFieldLabel>Rate %</TextFieldLabel>
+										<TextFieldLabel>Eat-in %</TextFieldLabel>
+										<TextFieldInput type="number" min="0" max="100" step="0.01" />
+									</TextField>
+								</div>
+								<div class="w-28">
+									<TextField
+										value={rateToPercent(row.takeAwayRateBps)}
+										onChange={(v) => {
+											setRows(index(), "takeAwayRateBps", percentToBps(v));
+											setRows(index(), "dirty", true);
+										}}
+									>
+										<TextFieldLabel>Take-away %</TextFieldLabel>
 										<TextFieldInput type="number" min="0" max="100" step="0.01" />
 									</TextField>
 								</div>

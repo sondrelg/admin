@@ -11,9 +11,18 @@ import { restaurantCafe } from "~/templates/restaurant-cafe";
 interface TaxRateRow {
 	localId: string;
 	name: string;
-	rateBps: number;
+	eatInRateBps: number;
+	takeAwayRateBps: number;
 	isDefault: boolean;
 }
+
+const rateToPercent = (bps: number) => (bps / 100).toFixed(bps % 100 === 0 ? 0 : 2);
+
+const percentToBps = (pct: string) => {
+	const num = Number.parseFloat(pct);
+	if (Number.isNaN(num)) return 0;
+	return Math.round(num * 100);
+};
 
 export function TaxRatesPage() {
 	const navigate = useNavigate();
@@ -24,13 +33,15 @@ export function TaxRatesPage() {
 			? state.taxRates.map((r) => ({
 					localId: r.id,
 					name: r.name,
-					rateBps: r.rateBps,
+					eatInRateBps: r.eatInRateBps,
+					takeAwayRateBps: r.takeAwayRateBps,
 					isDefault: false,
 				}))
 			: restaurantCafe.taxRates.map((r, i) => ({
 					localId: `template-${i}`,
 					name: r.name,
-					rateBps: r.rateBps,
+					eatInRateBps: r.eatInRateBps,
+					takeAwayRateBps: r.takeAwayRateBps,
 					isDefault: r.isDefault,
 				}));
 
@@ -44,21 +55,14 @@ export function TaxRatesPage() {
 		setRows(rows.length, {
 			localId: `new-${nextId++}`,
 			name: "",
-			rateBps: 2500,
+			eatInRateBps: 2500,
+			takeAwayRateBps: 2500,
 			isDefault: false,
 		});
 	};
 
 	const removeRow = (index: number) => {
 		setRows((prev) => prev.filter((_, i) => i !== index));
-	};
-
-	const rateToPercent = (bps: number) => (bps / 100).toFixed(bps % 100 === 0 ? 0 : 2);
-
-	const percentToBps = (pct: string) => {
-		const num = Number.parseFloat(pct);
-		if (Number.isNaN(num)) return 0;
-		return Math.round(num * 100);
 	};
 
 	const handleSubmit = async (e: Event) => {
@@ -89,13 +93,20 @@ export function TaxRatesPage() {
 			const created = [];
 			for (const row of rows) {
 				const res = await customFetch<{
-					data: { id: string; name: string; rate_bps: number; message?: string };
+					data: {
+						id: string;
+						name: string;
+						eat_in_rate_bps: number;
+						take_away_rate_bps: number;
+						message?: string;
+					};
 					status: number;
 				}>("/api/tax-rates", {
 					method: "POST",
 					body: JSON.stringify({
 						name: row.name,
-						rate_bps: row.rateBps,
+						eat_in_rate_bps: row.eatInRateBps,
+						take_away_rate_bps: row.takeAwayRateBps,
 						is_default: row.isDefault,
 					}),
 				});
@@ -112,7 +123,8 @@ export function TaxRatesPage() {
 				created.push({
 					id: res.data.id,
 					name: res.data.name,
-					rateBps: res.data.rate_bps,
+					eatInRateBps: res.data.eat_in_rate_bps,
+					takeAwayRateBps: res.data.take_away_rate_bps,
 				});
 			}
 
@@ -129,7 +141,7 @@ export function TaxRatesPage() {
 		<WizardLayout
 			step={3}
 			title="VAT Rates"
-			description="Norwegian standard rates are pre-filled. Food is 15%, beverages and merchandise are 25%."
+			description="Norwegian standard rates are pre-filled. Food is 25% eat-in, 15% take-away. Beverages and merchandise are 25%."
 		>
 			<form onSubmit={handleSubmit} class="space-y-6">
 				<div class="space-y-3">
@@ -144,10 +156,19 @@ export function TaxRatesPage() {
 								</div>
 								<div class="w-28">
 									<TextField
-										value={rateToPercent(row.rateBps)}
-										onChange={(v) => setRows(index(), "rateBps", percentToBps(v))}
+										value={rateToPercent(row.eatInRateBps)}
+										onChange={(v) => setRows(index(), "eatInRateBps", percentToBps(v))}
 									>
-										<TextFieldLabel>Rate %</TextFieldLabel>
+										<TextFieldLabel>Eat-in %</TextFieldLabel>
+										<TextFieldInput type="number" min="0" max="100" step="0.01" required />
+									</TextField>
+								</div>
+								<div class="w-28">
+									<TextField
+										value={rateToPercent(row.takeAwayRateBps)}
+										onChange={(v) => setRows(index(), "takeAwayRateBps", percentToBps(v))}
+									>
+										<TextFieldLabel>Take-away %</TextFieldLabel>
 										<TextFieldInput type="number" min="0" max="100" step="0.01" required />
 									</TextField>
 								</div>

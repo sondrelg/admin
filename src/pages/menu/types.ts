@@ -4,6 +4,7 @@ export interface MenuItem {
 	description: string | null;
 	price_minor_unit: number;
 	category_id: string | null;
+	tax_rate_id: string | null;
 	is_enabled: boolean;
 	sku: string | null;
 	display_order: number;
@@ -27,7 +28,8 @@ export interface Allergen {
 export interface TaxRate {
 	id: string;
 	name: string;
-	rate_bps: number;
+	eat_in_rate_bps: number;
+	take_away_rate_bps: number;
 	is_default: boolean;
 }
 
@@ -104,4 +106,12 @@ export function parsePriceToMinor(input: string): number {
 export function formatRateBps(bps: number): string {
 	const pct = bps / 100;
 	return Number.isInteger(pct) ? `${pct}%` : `${pct.toFixed(2)}%`;
+}
+
+export function formatTaxRateLabel(rate: TaxRate): string {
+	const eatIn = formatRateBps(rate.eat_in_rate_bps);
+	const takeAway = formatRateBps(rate.take_away_rate_bps);
+	return rate.eat_in_rate_bps === rate.take_away_rate_bps
+		? `${rate.name} (${eatIn})`
+		: `${rate.name} (${eatIn} / ${takeAway})`;
 }

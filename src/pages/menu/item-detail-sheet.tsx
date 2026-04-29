@@ -20,7 +20,7 @@ import type {
 	ModifierGroupAssignment,
 	TaxRate,
 } from "./types";
-import { formatPrice, formatRateBps, parsePriceToMinor } from "./types";
+import { formatPrice, formatTaxRateLabel, parsePriceToMinor } from "./types";
 
 export function ItemDetailSheet(props: {
 	item: MenuItem | null;
@@ -45,9 +45,9 @@ export function ItemDetailSheet(props: {
 	const [allAllergens, setAllAllergens] = createSignal<Allergen[]>([]);
 	const [itemAllergenIds, setItemAllergenIds] = createSignal<Set<string>>(new Set());
 	const [allTaxRates, setAllTaxRates] = createSignal<TaxRate[]>([]);
-	const [itemTaxRateIds, setItemTaxRateIds] = createSignal<Set<string>>(new Set());
+	const [itemTaxRateId, setItemTaxRateId] = createSignal<string | null>(null);
 	const [savingAllergens, setSavingAllergens] = createSignal(false);
-	const [savingTaxRates, setSavingTaxRates] = createSignal(false);
+	const [savingTaxRate, setSavingTaxRate] = createSignal(false);
 
 	// Modifier groups
 	const [itemModGroupIds, setItemModGroupIds] = createSignal<Set<string>>(new Set());
@@ -63,27 +63,25 @@ export function ItemDetailSheet(props: {
 			setSku(item.sku ?? "");
 			setCategoryId(item.category_id ?? "");
 			setIsEnabled(item.is_enabled);
+			setItemTaxRateId(item.tax_rate_id);
 			setError(null);
 			fetchItemDetails(item.id);
 		}
 	});
 
 	const fetchItemDetails = async (itemId: string) => {
-		const [allergensRes, itemAllergensRes, taxRatesRes, itemTaxRatesRes, itemModGroupsRes] =
-			await Promise.all([
-				customFetch<{ data: Allergen[]; status: number }>("/api/allergens"),
-				customFetch<{ data: Allergen[]; status: number }>(`/api/menu-items/${itemId}/allergens`),
-				customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates"),
-				customFetch<{ data: string[]; status: number }>(`/api/menu-items/${itemId}/tax-rates`),
-				customFetch<{ data: ModifierGroupAssignment[]; status: number }>(
-					`/api/menu-items/${itemId}/modifier-groups`,
-				),
-			]);
+		const [allergensRes, itemAllergensRes, taxRatesRes, itemModGroupsRes] = await Promise.all([
+			customFetch<{ data: Allergen[]; status: number }>("/api/allergens"),
+			customFetch<{ data: Allergen[]; status: number }>(`/api/menu-items/${itemId}/allergens`),
+			customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates"),
+			customFetch<{ data: ModifierGroupAssignment[]; status: number }>(
+				`/api/menu-items/${itemId}/modifier-groups`,
+			),
+		]);
 		if (allergensRes.status === 200) setAllAllergens(allergensRes.data);
 		if (itemAllergensRes.status === 200)
 			setItemAllergenIds(new Set(itemAllergensRes.data.map((a) => a.id)));
 		if (taxRatesRes.status === 200) setAllTaxRates(taxRatesRes.data);
-		if (itemTaxRatesRes.status === 200) setItemTaxRateIds(new Set(itemTaxRatesRes.data));
 		if (itemModGroupsRes.status === 200)
 			setItemModGroupIds(new Set(itemModGroupsRes.data.map((g) => g.modifier_group_id)));
 	};
@@ -109,6 +107,7 @@ export function ItemDetailSheet(props: {
 			name: name(),
 			price_minor_unit: priceMinor,
 			is_enabled: isEnabled(),
+			tax_rate_id: itemTaxRateId() || null,
 		};
 		if (description().trim()) body.description = description();
 		else body.description = null;
@@ -197,23 +196,23 @@ export function ItemDetailSheet(props: {
 		}
 	};
 
-	const toggleTaxRate = async (taxRateId: string) => {
+	const handleTaxRateChange = async (taxRateId: string) => {
 		const item = props.item;
 		if (!item) return;
 
-		const current = new Set(itemTaxRateIds());
-		if (current.has(taxRateId)) current.delete(taxRateId);
-		else current.add(taxRateId);
-
-		setSavingTaxRates(true);
-		const res = await customFetch<{ status: number }>(`/api/menu-items/${item.id}/tax-rates`, {
+		const newId = taxRateId || null;
+		setSavingTaxRate(true);
+		const res = await customFetch<{
+			data: MenuItem & { error?: string; message?: string };
+			status: number;
+		}>(`/api/menu-items/${item.id}`, {
 			method: "PUT",
-			body: JSON.stringify({ tax_rate_ids: [...current] }),
+			body: JSON.stringify({ tax_rate_id: newId }),
 		});
-		setSavingTaxRates(false);
+		setSavingTaxRate(false);
 
-		if (res.status === 200 || res.status === 204) {
-			setItemTaxRateIds(current);
+		if (res.status === 200) {
+			setItemTaxRateId(newId);
 		}
 	};
 
@@ -227,7 +226,7 @@ export function ItemDetailSheet(props: {
 			<SheetContent class="flex flex-col sm:max-w-md">
 				<SheetHeader>
 					<SheetTitle>{props.item?.name ?? "Item"}</SheetTitle>
-					<SheetDescription>Edit item details, allergens, and tax rates.</SheetDescription>
+					<SheetDescription>Edit item details, allergens, and tax rate.</SheetDescription>
 				</SheetHeader>
 
 				<div class="flex-1 space-y-6 overflow-y-auto py-4">
@@ -297,35 +296,24 @@ export function ItemDetailSheet(props: {
 					{/* Images */}
 					<Show when={props.item}>{(item) => <ImageManager itemId={item().id} />}</Show>
 
-					{/* Tax Rates */}
+					{/* Tax Rate */}
 					<div class="space-y-2">
-						<h4 class="text-sm font-medium">Tax Rates</h4>
+						<h4 class="text-sm font-medium">Tax Rate</h4>
 						<Show
 							when={allTaxRates().length > 0}
 							fallback={<p class="text-xs text-muted-foreground">No tax rates configured.</p>}
 						>
-							<div class="flex flex-wrap gap-2">
+							<select
+								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								value={itemTaxRateId() ?? ""}
+								onChange={(e) => handleTaxRateChange(e.currentTarget.value)}
+								disabled={savingTaxRate()}
+							>
+								<option value="">No tax rate</option>
 								<For each={allTaxRates()}>
-									{(rate) => {
-										const active = () => itemTaxRateIds().has(rate.id);
-										return (
-											<button
-												type="button"
-												class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
-												classList={{
-													"border-primary bg-primary/10 text-primary": active(),
-													"border-input bg-background text-muted-foreground hover:bg-accent":
-														!active(),
-												}}
-												disabled={savingTaxRates()}
-												onClick={() => toggleTaxRate(rate.id)}
-											>
-												{rate.name} ({formatRateBps(rate.rate_bps)})
-											</button>
-										);
-									}}
+									{(rate) => <option value={rate.id}>{formatTaxRateLabel(rate)}</option>}
 								</For>
-							</div>
+							</select>
 						</Show>
 					</div>
 

@@ -149,6 +149,7 @@ export function MenuPage() {
 					const item = validItems[itemIdx];
 					setProgress(`Creating "${item.name}"...`);
 
+					const taxRate = taxRates()[item.taxRateIndex];
 					const itemRes = await customFetch<{
 						data: { id: string; message?: string };
 						status: number;
@@ -159,23 +160,13 @@ export function MenuPage() {
 							price_minor_unit: item.priceMinorUnit,
 							category_id: catRes.data.id,
 							display_order: itemIdx,
+							tax_rate_id: taxRate?.id ?? null,
 						}),
 					});
 
 					if (itemRes.status !== 201) {
 						setError(itemRes.data?.message ?? `Failed to create item "${item.name}"`);
 						return;
-					}
-
-					// Assign tax rate
-					const taxRate = taxRates()[item.taxRateIndex];
-					if (taxRate) {
-						await customFetch<{ status: number }>(`/api/menu-items/${itemRes.data.id}/tax-rates`, {
-							method: "PUT",
-							body: JSON.stringify({
-								tax_rate_ids: [taxRate.id],
-							}),
-						});
 					}
 
 					itemCount++;
@@ -273,7 +264,7 @@ export function MenuPage() {
 													class="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
 													placeholder="Item name"
 												/>
-												<div class="w-24">
+												<div class="w-20">
 													<input
 														type="number"
 														value={Math.round(item.priceMinorUnit / 100)}
@@ -285,7 +276,7 @@ export function MenuPage() {
 																Number.parseInt(e.currentTarget.value || "0", 10) * 100,
 															)
 														}
-														class="w-full rounded-md border bg-transparent px-2 py-1 text-right text-sm outline-none"
+														class="w-full rounded-md border bg-transparent px-2 py-1 text-right text-sm outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 														min="0"
 													/>
 												</div>
@@ -305,7 +296,11 @@ export function MenuPage() {
 													<For each={taxRates()}>
 														{(rate, rateIdx) => (
 															<option value={rateIdx()}>
-																{rate.name} ({rate.rateBps / 100}%)
+																{rate.name} ({rate.eatInRateBps / 100}%
+																{rate.eatInRateBps !== rate.takeAwayRateBps
+																	? ` / ${rate.takeAwayRateBps / 100}%`
+																	: ""}
+																)
 															</option>
 														)}
 													</For>

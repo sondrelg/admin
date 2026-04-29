@@ -28,7 +28,8 @@ export interface WizardStaff {
 export interface WizardTaxRate {
 	id: string;
 	name: string;
-	rateBps: number;
+	eatInRateBps: number;
+	takeAwayRateBps: number;
 }
 
 export interface WizardCategory {

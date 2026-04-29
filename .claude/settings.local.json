@@ -1,13 +1,45 @@
 {
   "permissions": {
     "allow": [
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(find:*)",
+      "Bash(unzip:*)",
+      "Bash(cd:*)",
+      "Bash(jq *)",
+      "Bash(mkdir *)",
+      "WebSearch",
+      "WebFetch",
+      "Bash(cargo init:*)",
+      "Bash(cargo clippy:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo install:*)",
+      "Bash(cargo test:*)",
+      "Bash(DATABASE_URL=postgres://smls:smls@127.0.0.1:5432/smls cargo check 2>&1)",
+      "Bash(squawk migrations/*.sql 2>&1)",
+      "Bash(just lint-migrations:*)",
+      "Read(//Users/s/repos/oss/smls/admin/**)",
+      "Bash(bunx biome:*)",
+      "Bash(bun run:*)",
+      "Bash(cd /Users/s/repos/oss/smls/admin && npx tsc --noEmit 2>&1 | tail -30)",
+      "Bash(cd /Users/s/repos/oss/smls/admin && npx biome check src/pages/menu.tsx 2>&1 | tail -5)",
+      "Bash(cd /Users/s/repos/oss/smls/admin && npx biome check src/pages/menu.tsx 2>&1 | head -30)",
+      "Bash(cd /Users/s/repos/oss/smls/admin && npx biome check src/pages/menu.tsx 2>&1 | grep -E \"^\\(Checked| at |  ×\\)\")",
+      "Bash(cd /Users/s/repos/oss/smls/admin && npx tsc --noEmit 2>&1 | head -60)",
+      "Bash(/Users/s/repos/oss/smls/admin/node_modules/.bin/biome check:*)",
+      "Bash(cargo tree:*)",
       "WebFetch(domain:api.github.com)",
       "WebFetch(domain:www.solid-ui.com)",
       "Bash(cat:*)",
       "Bash(bun run fix:*)",
       "Bash(bun run verify:*)",
       "Bash(bun run check:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(ls -la /Users/s/repos/favrit/ng/frontend/src/routes/\\\\\\(app\\\\\\)/app/)"
     ]
   }
 }

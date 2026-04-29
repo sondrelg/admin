@@ -58,7 +58,13 @@ export function SummaryPage() {
 						<SummaryRow
 							label="VAT Rates"
 							value={`${state.taxRates.length} configured`}
-							detail={state.taxRates.map((r) => `${r.name} (${r.rateBps / 100}%)`).join(", ")}
+							detail={state.taxRates
+								.map((r) =>
+									r.eatInRateBps === r.takeAwayRateBps
+										? `${r.name} (${r.eatInRateBps / 100}%)`
+										: `${r.name} (${r.eatInRateBps / 100}% / ${r.takeAwayRateBps / 100}%)`,
+								)
+								.join(", ")}
 						/>
 						<SummaryRow
 							label="Menu"
