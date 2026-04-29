@@ -7,6 +7,7 @@
 - Default to small, focused components and modules.
   Avoid "god components." Extract logic into small files and keep responsibilities narrow.
 - When suggesting a new dependency, first check that there isn't an alternative available that has a smaller impact on bundle size. Use bundlephobia.com as a resource.
+- **Bundle size and tree-shaking are a priority.** Prefer granular imports (e.g. `@kobalte/core/button` over `@kobalte/core`), avoid importing entire libraries, and use `lazy()` for route-level code splitting. Run `bunx vite-bundle-visualizer` to check impact when adding dependencies.
 - Disable all buttons on submit to prevent double-presses
 
 ### SolidJS Reactivity Best Practices
