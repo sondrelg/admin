@@ -9,8 +9,9 @@ import {
 } from "@tanstack/solid-router";
 import { render } from "solid-js/web";
 import "solid-devtools";
-import { createEffect, Show } from "solid-js";
+import { createEffect, ErrorBoundary, Show } from "solid-js";
 import { DashboardLayout } from "~/components/dashboard-layout";
+import { ErrorFallback } from "~/components/ui/error-fallback";
 import { AuthProvider, useAuth } from "~/contexts/auth-context";
 import { useWizard, WizardProvider } from "~/contexts/wizard-context";
 import { DevicesPage } from "~/pages/devices";
@@ -30,6 +31,7 @@ import "./styles.css";
 
 const rootRoute = createRootRoute({
 	component: RootComponent,
+	errorComponent: (props) => <ErrorFallback error={props.error} reset={props.reset} fullPage />,
 	notFoundComponent: () => (
 		<div class="p-4">
 			<p class="text-lg">Page not found</p>
@@ -269,11 +271,15 @@ const rootElement = document.getElementById("app")!;
 if (!rootElement.innerHTML) {
 	render(
 		() => (
-			<AuthProvider>
-				<WizardProvider>
-					<RouterProvider router={router} />
-				</WizardProvider>
-			</AuthProvider>
+			<ErrorBoundary
+				fallback={(err, reset) => <ErrorFallback error={err} reset={reset} fullPage />}
+			>
+				<AuthProvider>
+					<WizardProvider>
+						<RouterProvider router={router} />
+					</WizardProvider>
+				</AuthProvider>
+			</ErrorBoundary>
 		),
 		rootElement,
 	);

@@ -1,5 +1,6 @@
-import type { JSX } from "solid-js";
+import { ErrorBoundary, type JSX } from "solid-js";
 import { AppSidebar } from "~/components/app-sidebar";
+import { ErrorFallback } from "~/components/ui/error-fallback";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
 
 export function DashboardLayout(props: { title: string; children: JSX.Element }) {
@@ -11,7 +12,15 @@ export function DashboardLayout(props: { title: string; children: JSX.Element })
 					<SidebarTrigger />
 					<h1 class="text-lg font-semibold">{props.title}</h1>
 				</header>
-				<div class="p-6">{props.children}</div>
+				<ErrorBoundary
+					fallback={(err, reset) => (
+						<div class="p-6">
+							<ErrorFallback error={err} reset={reset} />
+						</div>
+					)}
+				>
+					<div class="p-6">{props.children}</div>
+				</ErrorBoundary>
 			</SidebarInset>
 		</SidebarProvider>
 	);
