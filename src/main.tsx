@@ -84,12 +84,8 @@ function AuthenticatedHome() {
 			fallback={
 				<div class="flex min-h-screen items-center justify-center p-4">
 					<div class="w-full max-w-md space-y-8 text-center">
-						<h1 class="text-2xl font-bold tracking-tight">
-							Welcome, {user()?.name}
-						</h1>
-						<p class="text-muted-foreground">
-							Set up your point-of-sale system in a few minutes.
-						</p>
+						<h1 class="text-2xl font-bold tracking-tight">Welcome, {user()?.name}</h1>
+						<p class="text-muted-foreground">Set up your point-of-sale system in a few minutes.</p>
 						<Link
 							to="/setup/business"
 							class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
@@ -101,9 +97,7 @@ function AuthenticatedHome() {
 			}
 		>
 			<DashboardLayout title={state.tenant?.name ?? "Dashboard"}>
-				<p class="text-muted-foreground">
-					Your POS system is set up and ready.
-				</p>
+				<p class="text-muted-foreground">Your POS system is set up and ready.</p>
 			</DashboardLayout>
 		</Show>
 	);

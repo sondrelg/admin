@@ -123,11 +123,7 @@ export function WizardProvider(props: { children: JSX.Element }) {
 		isComplete,
 	};
 
-	return (
-		<WizardContext.Provider value={ctx}>
-			{props.children}
-		</WizardContext.Provider>
-	);
+	return <WizardContext.Provider value={ctx}>{props.children}</WizardContext.Provider>;
 }
 
 export function useWizard(): WizardContextValue {

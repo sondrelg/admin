@@ -4,8 +4,6 @@ const IDEMPOTENCY_HEADER = "Idempotency-Key";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 let currentTenantId: string | null = null;
-let currentAuthToken: string | null = null;
-
 export function setTenantId(id: string | null) {
 	currentTenantId = id;
 }
@@ -14,27 +12,13 @@ export function getTenantId(): string | null {
 	return currentTenantId;
 }
 
-export function setAuthToken(token: string | null) {
-	currentAuthToken = token;
-}
-
-export function getAuthToken(): string | null {
-	return currentAuthToken;
-}
-
 function generateUuidV4(): string {
-	if (
-		typeof crypto !== "undefined" &&
-		typeof crypto.randomUUID === "function"
-	) {
+	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
 		return crypto.randomUUID();
 	}
 
 	const bytes = new Uint8Array(16);
-	if (
-		typeof crypto !== "undefined" &&
-		typeof crypto.getRandomValues === "function"
-	) {
+	if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
 		crypto.getRandomValues(bytes);
 	} else {
 		for (let i = 0; i < bytes.length; i += 1) {
@@ -57,19 +41,13 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 100;
 
-function shouldRetry(
-	status: number,
-	method: string,
-	hasIdempotencyKey: boolean,
-): boolean {
+function shouldRetry(status: number, method: string, hasIdempotencyKey: boolean): boolean {
 	if (status === 0) return true;
 	if (status >= 500 && status < 600) return true;
 	if (status === 429) return true;
 	if (status >= 400 && status < 500) return false;
 
-	const isIdempotent = ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"].includes(
-		method,
-	);
+	const isIdempotent = ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"].includes(method);
 	const isSafePost = method === "POST" && hasIdempotencyKey;
 
 	return isIdempotent || isSafePost;
@@ -82,15 +60,12 @@ function calculateRetryDelay(attempt: number, retryAfterMs?: number): number {
 	return baseDelay + jitter;
 }
 
-function parseRetryAfter(
-	retryAfter: string | null | undefined,
-): number | undefined {
+function parseRetryAfter(retryAfter: string | null | undefined): number | undefined {
 	if (!retryAfter) return undefined;
 	const seconds = Number.parseInt(retryAfter, 10);
 	if (!Number.isNaN(seconds)) return seconds * 1000;
 	const date = new Date(retryAfter);
-	if (!Number.isNaN(date.getTime()))
-		return Math.max(0, date.getTime() - Date.now());
+	if (!Number.isNaN(date.getTime())) return Math.max(0, date.getTime() - Date.now());
 	return undefined;
 }
 
@@ -98,19 +73,12 @@ async function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function customFetch<T>(
-	url: string,
-	options?: RequestInit,
-): Promise<T> {
+export async function customFetch<T>(url: string, options?: RequestInit): Promise<T> {
 	const fullUrl = resolveApiUrl(url);
 	const headers = new Headers(options?.headers);
 	// Let the browser set Content-Type for FormData (includes multipart boundary)
 	if (!(options?.body instanceof FormData)) {
 		headers.set("Content-Type", "application/json");
-	}
-
-	if (currentAuthToken) {
-		headers.set("Authorization", `Bearer ${currentAuthToken}`);
 	}
 
 	if (currentTenantId) {
@@ -137,6 +105,7 @@ export async function customFetch<T>(
 			response = await fetch(fullUrl, {
 				...options,
 				headers,
+				credentials: "include",
 				signal: controller.signal,
 			});
 			status = response.status;

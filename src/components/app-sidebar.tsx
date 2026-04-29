@@ -300,15 +300,11 @@ export function AppSidebar() {
 						<div class="flex items-center gap-2 p-2">
 							<div class="flex min-w-0 flex-1 items-center gap-3 px-2 py-2">
 								<div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-									<span class="text-sm font-medium">
-										{u().name.charAt(0).toUpperCase()}
-									</span>
+									<span class="text-sm font-medium">{u().name.charAt(0).toUpperCase()}</span>
 								</div>
 								<div class="min-w-0 flex-1">
 									<p class="truncate text-sm font-medium">{u().name}</p>
-									<p class="truncate text-xs text-muted-foreground">
-										{u().email}
-									</p>
+									<p class="truncate text-xs text-muted-foreground">{u().email}</p>
 								</div>
 							</div>
 							<button

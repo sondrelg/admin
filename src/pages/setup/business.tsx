@@ -47,10 +47,12 @@ export function BusinessPage() {
 
 	const validate = (): string | null => {
 		if (!businessName().trim()) return "Business name is required.";
-		if (!slugValid()) return "Slug must be lowercase letters, digits, and hyphens (at least 2 characters, cannot start or end with a hyphen).";
+		if (!slugValid())
+			return "Slug must be lowercase letters, digits, and hyphens (at least 2 characters, cannot start or end with a hyphen).";
 		if (!locationName().trim()) return "Location name is required.";
 		if (!address() || address().length < 2) return "Address is required (at least 2 characters).";
-		if (!postalCode() || !POSTAL_RE.test(postalCode())) return "Postal code must be exactly 4 digits.";
+		if (!postalCode() || !POSTAL_RE.test(postalCode()))
+			return "Postal code must be exactly 4 digits.";
 		if (!city() || city().length < 2) return "City is required (at least 2 characters).";
 		if (!orgNumber() || orgNumber().length !== 9) return "Org. number must be exactly 9 digits.";
 		return null;

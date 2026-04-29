@@ -81,7 +81,12 @@ export function SignUpPage() {
 
 						<TextField value={email()} onChange={setEmail}>
 							<TextFieldLabel>Email</TextFieldLabel>
-							<TextFieldInput type="email" placeholder="ola@example.com" required autocomplete="email" />
+							<TextFieldInput
+								type="email"
+								placeholder="ola@example.com"
+								required
+								autocomplete="email"
+							/>
 						</TextField>
 
 						<TextField value={password()} onChange={setPassword}>

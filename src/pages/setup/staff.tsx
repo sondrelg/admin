@@ -55,7 +55,9 @@ export function StaffPage() {
 				});
 
 				if (staffRes.status !== 201) {
-					setError(staffRes.data?.error ?? staffRes.data?.message ?? "Failed to create staff member");
+					setError(
+						staffRes.data?.error ?? staffRes.data?.message ?? "Failed to create staff member",
+					);
 					return;
 				}
 
