@@ -1,0 +1,62 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
+	"files": {
+		"includes": [
+			"**",
+			"!**/src/api/generated/**",
+			"!**/src/api/models/**",
+			"!**/dist/**"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 100
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"jsxQuoteStyle": "double",
+			"trailingCommas": "all",
+			"semicolons": "always",
+			"arrowParentheses": "always"
+		}
+	},
+	"css": {
+		"parser": {
+			"cssModules": true,
+			"tailwindDirectives": true
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noSolidDestructuredProps": "error",
+				"noUnusedVariables": "error"
+			},
+			"style": {
+				"noNonNullAssertion": "off",
+				"useConst": "error",
+				"useTemplate": "warn",
+				"useExponentiationOperator": "error",
+				"useNodejsImportProtocol": "off"
+			},
+			"suspicious": {
+				"noDebugger": "warn",
+				"noDoubleEquals": "warn",
+				"noExplicitAny": "warn"
+			},
+			"a11y": {
+				"useKeyWithClickEvents": "off"
+			},
+			"nursery": {
+				"useSortedClasses": "off"
+			}
+		}
+	}
+}

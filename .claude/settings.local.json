@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:www.solid-ui.com)",
+      "Bash(cat:*)",
+      "Bash(bun run fix:*)",
+      "Bash(bun run verify:*)",
+      "Bash(bun run check:*)"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "plugins": ["typescript", "import", "react", "jsx-a11y", "unicorn"],
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "categories": {
+    "correctness": "warn",
+    "suspicious": "warn",
+    "pedantic": "off",
+    "perf": "off"
+  },
+  "rules": {
+    "import/no-absolute-path": "off",
+    "import/no-unassigned-import": "off",
+    "import/no-default-export": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-unused-vars": "off",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/prefer-as-const": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-undef": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/no-children-prop": "error",
+    "react/no-danger-with-children": "error",
+    "react/no-deprecated": "warn",
+    "react/void-dom-elements-no-children": "error",
+    "unicorn/prefer-node-protocol": "off",
+    "unicorn/no-array-for-each": "warn",
+    "unicorn/no-useless-spread": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-null": "off",
+    "unicorn/prevent-abbreviations": "off",
+    "jsx-a11y/label-has-associated-control": "off",
+    "no-unused-vars": "off"
+  },
+  "overrides": [
+    {
+      "files": ["*.tsx", "*.jsx"],
+      "rules": {
+        "react/jsx-key": "error",
+        "react/jsx-no-target-blank": "warn"
+      }
+    },
+    {
+      "files": ["vite.config.ts", "*.config.ts", "*.config.js"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "build",
+    ".svelte-kit",
+    "vite.config.ts",
+    "src/api/generated/**",
+    "src/api/models/**"
+  ]
+}
