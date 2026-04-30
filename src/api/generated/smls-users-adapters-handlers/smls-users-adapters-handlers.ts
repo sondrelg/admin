@@ -6,13 +6,98 @@
  */
 import type {
   AuthResponse,
+  ChangePasswordRequest,
+  DeleteAccountRequest,
+  ForgotPasswordRequest,
   MeResponse,
+  RegisterPasskeyStart,
+  RenamePasskeyRequest,
+  ResetPasswordRequest,
   SignIn,
   SignUp,
+  UserPasskeySummary,
   VerifyEmailRequest
 } from '../../models';
 
 import { customFetch } from '../../client';
+
+export type changePasswordResponse200 = {
+  data: void
+  status: 200
+}
+
+export type changePasswordResponse400 = {
+  data: void
+  status: 400
+}
+
+export type changePasswordResponse401 = {
+  data: void
+  status: 401
+}
+    
+export type changePasswordResponseSuccess = (changePasswordResponse200) & {
+  headers: Headers;
+};
+export type changePasswordResponseError = (changePasswordResponse400 | changePasswordResponse401) & {
+  headers: Headers;
+};
+
+export type changePasswordResponse = (changePasswordResponseSuccess | changePasswordResponseError)
+
+export const getChangePasswordUrl = () => {
+
+
+  
+
+  return `/api/auth/change-password`
+}
+
+export const changePassword = async (changePasswordRequest: ChangePasswordRequest, options?: RequestInit): Promise<changePasswordResponse> => {
+  
+  return customFetch<changePasswordResponse>(getChangePasswordUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      changePasswordRequest,)
+  }
+);}
+
+
+export type forgotPasswordResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type forgotPasswordResponseSuccess = (forgotPasswordResponse200) & {
+  headers: Headers;
+};
+;
+
+export type forgotPasswordResponse = (forgotPasswordResponseSuccess)
+
+export const getForgotPasswordUrl = () => {
+
+
+  
+
+  return `/api/auth/forgot-password`
+}
+
+export const forgotPassword = async (forgotPasswordRequest: ForgotPasswordRequest, options?: RequestInit): Promise<forgotPasswordResponse> => {
+  
+  return customFetch<forgotPasswordResponse>(getForgotPasswordUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      forgotPasswordRequest,)
+  }
+);}
+
 
 export type meResponse200 = {
   data: MeResponse
@@ -49,6 +134,385 @@ export const me = async ( options?: RequestInit): Promise<meResponse> => {
     method: 'GET'
     
     
+  }
+);}
+
+
+export type deleteAccountResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteAccountResponse401 = {
+  data: void
+  status: 401
+}
+    
+export type deleteAccountResponseSuccess = (deleteAccountResponse204) & {
+  headers: Headers;
+};
+export type deleteAccountResponseError = (deleteAccountResponse401) & {
+  headers: Headers;
+};
+
+export type deleteAccountResponse = (deleteAccountResponseSuccess | deleteAccountResponseError)
+
+export const getDeleteAccountUrl = () => {
+
+
+  
+
+  return `/api/auth/me`
+}
+
+export const deleteAccount = async (deleteAccountRequest: DeleteAccountRequest, options?: RequestInit): Promise<deleteAccountResponse> => {
+  
+  return customFetch<deleteAccountResponse>(getDeleteAccountUrl(),
+  {      
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      deleteAccountRequest,)
+  }
+);}
+
+
+export type listPasskeysResponse200 = {
+  data: UserPasskeySummary[]
+  status: 200
+}
+
+export type listPasskeysResponse401 = {
+  data: void
+  status: 401
+}
+    
+export type listPasskeysResponseSuccess = (listPasskeysResponse200) & {
+  headers: Headers;
+};
+export type listPasskeysResponseError = (listPasskeysResponse401) & {
+  headers: Headers;
+};
+
+export type listPasskeysResponse = (listPasskeysResponseSuccess | listPasskeysResponseError)
+
+export const getListPasskeysUrl = () => {
+
+
+  
+
+  return `/api/auth/passkeys`
+}
+
+export const listPasskeys = async ( options?: RequestInit): Promise<listPasskeysResponse> => {
+  
+  return customFetch<listPasskeysResponse>(getListPasskeysUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+export type passkeyLoginFinishResponse200 = {
+  data: AuthResponse
+  status: 200
+}
+
+export type passkeyLoginFinishResponse400 = {
+  data: void
+  status: 400
+}
+    
+export type passkeyLoginFinishResponseSuccess = (passkeyLoginFinishResponse200) & {
+  headers: Headers;
+};
+export type passkeyLoginFinishResponseError = (passkeyLoginFinishResponse400) & {
+  headers: Headers;
+};
+
+export type passkeyLoginFinishResponse = (passkeyLoginFinishResponseSuccess | passkeyLoginFinishResponseError)
+
+export const getPasskeyLoginFinishUrl = () => {
+
+
+  
+
+  return `/api/auth/passkeys/login/finish`
+}
+
+export const passkeyLoginFinish = async (passkeyLoginFinishBody: unknown, options?: RequestInit): Promise<passkeyLoginFinishResponse> => {
+  
+  return customFetch<passkeyLoginFinishResponse>(getPasskeyLoginFinishUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      passkeyLoginFinishBody,)
+  }
+);}
+
+
+export type passkeyLoginStartResponse200 = {
+  data: void
+  status: 200
+}
+
+export type passkeyLoginStartResponse404 = {
+  data: void
+  status: 404
+}
+    
+export type passkeyLoginStartResponseSuccess = (passkeyLoginStartResponse200) & {
+  headers: Headers;
+};
+export type passkeyLoginStartResponseError = (passkeyLoginStartResponse404) & {
+  headers: Headers;
+};
+
+export type passkeyLoginStartResponse = (passkeyLoginStartResponseSuccess | passkeyLoginStartResponseError)
+
+export const getPasskeyLoginStartUrl = () => {
+
+
+  
+
+  return `/api/auth/passkeys/login/start`
+}
+
+export const passkeyLoginStart = async (forgotPasswordRequest: ForgotPasswordRequest, options?: RequestInit): Promise<passkeyLoginStartResponse> => {
+  
+  return customFetch<passkeyLoginStartResponse>(getPasskeyLoginStartUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      forgotPasswordRequest,)
+  }
+);}
+
+
+export type passkeyRegisterFinishResponse201 = {
+  data: UserPasskeySummary
+  status: 201
+}
+
+export type passkeyRegisterFinishResponse400 = {
+  data: void
+  status: 400
+}
+
+export type passkeyRegisterFinishResponse401 = {
+  data: void
+  status: 401
+}
+    
+export type passkeyRegisterFinishResponseSuccess = (passkeyRegisterFinishResponse201) & {
+  headers: Headers;
+};
+export type passkeyRegisterFinishResponseError = (passkeyRegisterFinishResponse400 | passkeyRegisterFinishResponse401) & {
+  headers: Headers;
+};
+
+export type passkeyRegisterFinishResponse = (passkeyRegisterFinishResponseSuccess | passkeyRegisterFinishResponseError)
+
+export const getPasskeyRegisterFinishUrl = () => {
+
+
+  
+
+  return `/api/auth/passkeys/register/finish`
+}
+
+export const passkeyRegisterFinish = async (passkeyRegisterFinishBody: unknown, options?: RequestInit): Promise<passkeyRegisterFinishResponse> => {
+  
+  return customFetch<passkeyRegisterFinishResponse>(getPasskeyRegisterFinishUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      passkeyRegisterFinishBody,)
+  }
+);}
+
+
+export type passkeyRegisterStartResponse200 = {
+  data: void
+  status: 200
+}
+
+export type passkeyRegisterStartResponse401 = {
+  data: void
+  status: 401
+}
+    
+export type passkeyRegisterStartResponseSuccess = (passkeyRegisterStartResponse200) & {
+  headers: Headers;
+};
+export type passkeyRegisterStartResponseError = (passkeyRegisterStartResponse401) & {
+  headers: Headers;
+};
+
+export type passkeyRegisterStartResponse = (passkeyRegisterStartResponseSuccess | passkeyRegisterStartResponseError)
+
+export const getPasskeyRegisterStartUrl = () => {
+
+
+  
+
+  return `/api/auth/passkeys/register/start`
+}
+
+export const passkeyRegisterStart = async (registerPasskeyStart: RegisterPasskeyStart, options?: RequestInit): Promise<passkeyRegisterStartResponse> => {
+  
+  return customFetch<passkeyRegisterStartResponse>(getPasskeyRegisterStartUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      registerPasskeyStart,)
+  }
+);}
+
+
+export type renamePasskeyResponse200 = {
+  data: void
+  status: 200
+}
+
+export type renamePasskeyResponse401 = {
+  data: void
+  status: 401
+}
+
+export type renamePasskeyResponse404 = {
+  data: void
+  status: 404
+}
+    
+export type renamePasskeyResponseSuccess = (renamePasskeyResponse200) & {
+  headers: Headers;
+};
+export type renamePasskeyResponseError = (renamePasskeyResponse401 | renamePasskeyResponse404) & {
+  headers: Headers;
+};
+
+export type renamePasskeyResponse = (renamePasskeyResponseSuccess | renamePasskeyResponseError)
+
+export const getRenamePasskeyUrl = (id: string,) => {
+
+
+  
+
+  return `/api/auth/passkeys/${id}`
+}
+
+export const renamePasskey = async (id: string,
+    renamePasskeyRequest: RenamePasskeyRequest, options?: RequestInit): Promise<renamePasskeyResponse> => {
+  
+  return customFetch<renamePasskeyResponse>(getRenamePasskeyUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      renamePasskeyRequest,)
+  }
+);}
+
+
+export type deletePasskeyResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deletePasskeyResponse401 = {
+  data: void
+  status: 401
+}
+
+export type deletePasskeyResponse404 = {
+  data: void
+  status: 404
+}
+    
+export type deletePasskeyResponseSuccess = (deletePasskeyResponse204) & {
+  headers: Headers;
+};
+export type deletePasskeyResponseError = (deletePasskeyResponse401 | deletePasskeyResponse404) & {
+  headers: Headers;
+};
+
+export type deletePasskeyResponse = (deletePasskeyResponseSuccess | deletePasskeyResponseError)
+
+export const getDeletePasskeyUrl = (id: string,) => {
+
+
+  
+
+  return `/api/auth/passkeys/${id}`
+}
+
+export const deletePasskey = async (id: string, options?: RequestInit): Promise<deletePasskeyResponse> => {
+  
+  return customFetch<deletePasskeyResponse>(getDeletePasskeyUrl(id),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+
+
+export type resetPasswordResponse200 = {
+  data: void
+  status: 200
+}
+
+export type resetPasswordResponse400 = {
+  data: void
+  status: 400
+}
+
+export type resetPasswordResponse404 = {
+  data: void
+  status: 404
+}
+    
+export type resetPasswordResponseSuccess = (resetPasswordResponse200) & {
+  headers: Headers;
+};
+export type resetPasswordResponseError = (resetPasswordResponse400 | resetPasswordResponse404) & {
+  headers: Headers;
+};
+
+export type resetPasswordResponse = (resetPasswordResponseSuccess | resetPasswordResponseError)
+
+export const getResetPasswordUrl = () => {
+
+
+  
+
+  return `/api/auth/reset-password`
+}
+
+export const resetPassword = async (resetPasswordRequest: ResetPasswordRequest, options?: RequestInit): Promise<resetPasswordResponse> => {
+  
+  return customFetch<resetPasswordResponse>(getResetPasswordUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      resetPasswordRequest,)
   }
 );}
 

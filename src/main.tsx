@@ -31,7 +31,10 @@ import { TaxRatesPage as SetupTaxRatesPage } from "~/pages/setup/tax-rates";
 import { SignUpPage } from "~/pages/sign-up";
 import { StaffPage } from "~/pages/staff";
 import { TaxRatesPage } from "~/pages/tax-rates";
+import { initTelemetry } from "~/telemetry";
 import "./styles.css";
+
+initTelemetry();
 
 const rootRoute = createRootRoute({
 	component: RootComponent,

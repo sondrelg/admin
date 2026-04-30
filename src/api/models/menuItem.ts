@@ -9,6 +9,7 @@ export interface MenuItem {
   /** @nullable */
   category_id?: string | null;
   created_at: string;
+  deposit_minor_unit: number;
   /** @nullable */
   description?: string | null;
   display_order: number;

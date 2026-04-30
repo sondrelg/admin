@@ -8,6 +8,7 @@ import type { OrderItemStatus } from './orderItemStatus';
 
 export interface OrderItem {
   created_at: string;
+  deposit_unit_minor_unit: number;
   /** @nullable */
   discard_reason?: string | null;
   /** @nullable */

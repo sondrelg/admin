@@ -24,6 +24,13 @@
   },
   "dependencies": {
     "@kobalte/core": "^0.13.11",
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.216.0",
+    "@opentelemetry/instrumentation-fetch": "^0.216.0",
+    "@opentelemetry/resources": "^2.7.1",
+    "@opentelemetry/sdk-trace-base": "^2.7.1",
+    "@opentelemetry/sdk-trace-web": "^2.7.1",
+    "@opentelemetry/semantic-conventions": "^1.40.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@tanstack/solid-query": "^5.90.23",
     "@tanstack/solid-router": "^1.131.35",

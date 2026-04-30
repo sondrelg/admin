@@ -8,6 +8,7 @@
 export interface CreateMenuItem {
   /** @nullable */
   category_id?: string | null;
+  deposit_minor_unit?: number;
   /** @nullable */
   description?: string | null;
   /** @nullable */

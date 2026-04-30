@@ -9,6 +9,8 @@ export interface UpdateMenuItem {
   /** @nullable */
   category_id?: string | null;
   /** @nullable */
+  deposit_minor_unit?: number | null;
+  /** @nullable */
   description?: string | null;
   /** @nullable */
   display_order?: number | null;
