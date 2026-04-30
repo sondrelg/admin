@@ -143,34 +143,36 @@ export function MenuPage() {
 
 				createdCats.push({ id: catRes.data.id, name: catRes.data.name });
 
-				// Create items for this category
+				// Create all items for this category in parallel
 				const validItems = cat.items.filter((item) => item.name.trim());
-				for (let itemIdx = 0; itemIdx < validItems.length; itemIdx++) {
-					const item = validItems[itemIdx];
-					setProgress(`Creating "${item.name}"...`);
+				setProgress(`Creating ${validItems.length} items in "${cat.name}"...`);
 
-					const taxRate = taxRates()[item.taxRateIndex];
-					const itemRes = await customFetch<{
-						data: { id: string; message?: string };
-						status: number;
-					}>("/api/menu-items", {
-						method: "POST",
-						body: JSON.stringify({
-							name: item.name,
-							price_minor_unit: item.priceMinorUnit,
-							category_id: catRes.data.id,
-							display_order: itemIdx,
-							tax_rate_id: taxRate?.id ?? null,
-						}),
-					});
+				const itemResults = await Promise.all(
+					validItems.map((item, itemIdx) => {
+						const taxRate = taxRates()[item.taxRateIndex];
+						return customFetch<{
+							data: { id: string; message?: string };
+							status: number;
+						}>("/api/menu-items", {
+							method: "POST",
+							body: JSON.stringify({
+								name: item.name,
+								price_minor_unit: item.priceMinorUnit,
+								category_id: catRes.data.id,
+								display_order: itemIdx,
+								tax_rate_id: taxRate?.id ?? null,
+							}),
+						});
+					}),
+				);
 
-					if (itemRes.status !== 201) {
-						setError(itemRes.data?.message ?? `Failed to create item "${item.name}"`);
-						return;
-					}
-
-					itemCount++;
+				const failedItem = itemResults.find((r) => r.status !== 201);
+				if (failedItem) {
+					setError(failedItem.data?.message ?? "Failed to create menu item");
+					return;
 				}
+
+				itemCount += validItems.length;
 			}
 
 			setCategories(createdCats);

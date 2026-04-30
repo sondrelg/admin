@@ -26,6 +26,8 @@ export function ItemDetailSheet(props: {
 	item: MenuItem | null;
 	categories: Category[];
 	modifierGroups: ModifierGroup[];
+	allergens: Allergen[];
+	taxRates: TaxRate[];
 	allItems: MenuItem[];
 	onClose: () => void;
 	onUpdated: (item: MenuItem) => void;
@@ -42,9 +44,7 @@ export function ItemDetailSheet(props: {
 	const [error, setError] = createSignal<string | null>(null);
 
 	// Allergens & tax rates
-	const [allAllergens, setAllAllergens] = createSignal<Allergen[]>([]);
 	const [itemAllergenIds, setItemAllergenIds] = createSignal<Set<string>>(new Set());
-	const [allTaxRates, setAllTaxRates] = createSignal<TaxRate[]>([]);
 	const [itemTaxRateId, setItemTaxRateId] = createSignal<string | null>(null);
 	const [savingAllergens, setSavingAllergens] = createSignal(false);
 	const [savingTaxRate, setSavingTaxRate] = createSignal(false);
@@ -70,18 +70,14 @@ export function ItemDetailSheet(props: {
 	});
 
 	const fetchItemDetails = async (itemId: string) => {
-		const [allergensRes, itemAllergensRes, taxRatesRes, itemModGroupsRes] = await Promise.all([
-			customFetch<{ data: Allergen[]; status: number }>("/api/allergens"),
+		const [itemAllergensRes, itemModGroupsRes] = await Promise.all([
 			customFetch<{ data: Allergen[]; status: number }>(`/api/menu-items/${itemId}/allergens`),
-			customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates"),
 			customFetch<{ data: ModifierGroupAssignment[]; status: number }>(
 				`/api/menu-items/${itemId}/modifier-groups`,
 			),
 		]);
-		if (allergensRes.status === 200) setAllAllergens(allergensRes.data);
 		if (itemAllergensRes.status === 200)
 			setItemAllergenIds(new Set(itemAllergensRes.data.map((a) => a.id)));
-		if (taxRatesRes.status === 200) setAllTaxRates(taxRatesRes.data);
 		if (itemModGroupsRes.status === 200)
 			setItemModGroupIds(new Set(itemModGroupsRes.data.map((g) => g.modifier_group_id)));
 	};
@@ -300,7 +296,7 @@ export function ItemDetailSheet(props: {
 					<div class="space-y-2">
 						<h4 class="text-sm font-medium">Tax Rate</h4>
 						<Show
-							when={allTaxRates().length > 0}
+							when={props.taxRates.length > 0}
 							fallback={<p class="text-xs text-muted-foreground">No tax rates configured.</p>}
 						>
 							<select
@@ -310,7 +306,7 @@ export function ItemDetailSheet(props: {
 								disabled={savingTaxRate()}
 							>
 								<option value="">No tax rate</option>
-								<For each={allTaxRates()}>
+								<For each={props.taxRates}>
 									{(rate) => <option value={rate.id}>{formatTaxRateLabel(rate)}</option>}
 								</For>
 							</select>
@@ -359,11 +355,11 @@ export function ItemDetailSheet(props: {
 					<div class="space-y-2">
 						<h4 class="text-sm font-medium">Allergens</h4>
 						<Show
-							when={allAllergens().length > 0}
+							when={props.allergens.length > 0}
 							fallback={<p class="text-xs text-muted-foreground">No allergens available.</p>}
 						>
 							<div class="flex flex-wrap gap-2">
-								<For each={allAllergens()}>
+								<For each={props.allergens}>
 									{(allergen) => {
 										const active = () => itemAllergenIds().has(allergen.id);
 										return (

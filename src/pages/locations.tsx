@@ -1,4 +1,4 @@
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import {
@@ -54,21 +54,26 @@ function parsePriceToMinor(input: string): number {
 
 export function LocationsPage() {
 	const [locations, setLocations] = createSignal<Location[]>([]);
+	const [menuItems, setMenuItems] = createSignal<MenuItem[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);
 	const [dialogOpen, setDialogOpen] = createSignal(false);
 	const [expandedId, setExpandedId] = createSignal<string | null>(null);
 
 	const fetchLocations = async () => {
-		const res = await customFetch<{
-			data: Location[] & { error?: string; message?: string };
-			status: number;
-		}>("/api/locations");
-		if (res.status === 200) {
-			setLocations(res.data);
+		const [locRes, itemsRes] = await Promise.all([
+			customFetch<{
+				data: Location[] & { error?: string; message?: string };
+				status: number;
+			}>("/api/locations"),
+			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
+		]);
+		if (locRes.status === 200) {
+			setLocations(locRes.data);
 		} else {
-			setError(res.data?.error ?? res.data?.message ?? "Failed to load locations");
+			setError(locRes.data?.error ?? locRes.data?.message ?? "Failed to load locations");
 		}
+		if (itemsRes.status === 200) setMenuItems(itemsRes.data);
 		setLoading(false);
 	};
 
@@ -164,7 +169,7 @@ export function LocationsPage() {
 										Menu Overrides
 									</button>
 									<Show when={expandedId() === loc.id}>
-										<LocationOverrides locationId={loc.id} />
+										<LocationOverrides locationId={loc.id} menuItems={menuItems()} />
 									</Show>
 								</div>
 							</div>
@@ -186,8 +191,7 @@ export function LocationsPage() {
 // Location Overrides
 // ---------------------------------------------------------------------------
 
-function LocationOverrides(props: { locationId: string }) {
-	const [allItems, setAllItems] = createSignal<MenuItem[]>([]);
+function LocationOverrides(props: { locationId: string; menuItems: MenuItem[] }) {
 	const [overrides, setOverrides] = createSignal<LocationMenuOverride[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	const [search, setSearch] = createSignal("");
@@ -195,41 +199,38 @@ function LocationOverrides(props: { locationId: string }) {
 	const [error, setError] = createSignal<string | null>(null);
 
 	const fetchData = async () => {
-		const [itemsRes, overridesRes] = await Promise.all([
-			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
-			customFetch<{ data: LocationMenuOverride[]; status: number }>(
-				`/api/locations/${props.locationId}/menu-overrides`,
-			),
-		]);
-		if (itemsRes.status === 200) setAllItems(itemsRes.data);
+		const overridesRes = await customFetch<{
+			data: LocationMenuOverride[];
+			status: number;
+		}>(`/api/locations/${props.locationId}/menu-overrides`);
 		if (overridesRes.status === 200) setOverrides(overridesRes.data);
 		setLoading(false);
 	};
 
 	onMount(fetchData);
 
-	const overrideMap = () => {
+	const overrideMap = createMemo(() => {
 		const map = new Map<string, LocationMenuOverride>();
 		for (const o of overrides()) {
 			map.set(o.menu_item_id, o);
 		}
 		return map;
-	};
+	});
 
-	const itemsWithOverrides = () => {
+	const itemsWithOverrides = createMemo(() => {
 		const oMap = overrideMap();
-		return allItems()
+		return props.menuItems
 			.filter((item) => oMap.has(item.id))
 			.map((item) => ({ item, override: oMap.get(item.id)! }));
-	};
+	});
 
-	const filteredAvailableItems = () => {
+	const filteredAvailableItems = createMemo(() => {
 		const oMap = overrideMap();
 		const q = search().toLowerCase().trim();
-		return allItems()
+		return props.menuItems
 			.filter((item) => !oMap.has(item.id))
 			.filter((item) => !q || item.name.toLowerCase().includes(q));
-	};
+	});
 
 	const setOverride = async (
 		menuItemId: string,

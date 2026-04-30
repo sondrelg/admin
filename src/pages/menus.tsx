@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, onMount, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import {
@@ -108,14 +108,19 @@ export function MenusPage() {
 	const [error, setError] = createSignal<string | null>(null);
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const [selectedMenu, setSelectedMenu] = createSignal<Menu | null>(null);
+	const [allMenuItems, setAllMenuItems] = createSignal<MenuItem[]>([]);
 
 	const fetchMenus = async () => {
-		const res = await customFetch<{ data: Menu[]; status: number }>("/api/menus");
-		if (res.status === 200) setMenus(res.data);
+		const [menusRes, itemsRes] = await Promise.all([
+			customFetch<{ data: Menu[]; status: number }>("/api/menus"),
+			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
+		]);
+		if (menusRes.status === 200) setMenus(menusRes.data);
 		else {
-			const d = res.data as unknown as { error?: string; message?: string };
+			const d = menusRes.data as unknown as { error?: string; message?: string };
 			setError(d?.error ?? d?.message ?? "Failed to load menus");
 		}
+		if (itemsRes.status === 200) setAllMenuItems(itemsRes.data);
 		setLoading(false);
 	};
 
@@ -223,6 +228,7 @@ export function MenusPage() {
 
 			<MenuDetailSheet
 				menu={selectedMenu()}
+				allMenuItems={allMenuItems()}
 				onClose={() => setSelectedMenu(null)}
 				onUpdated={handleUpdated}
 				onDeleted={handleDeleted}
@@ -322,6 +328,7 @@ function CreateMenuDialog(props: {
 
 function MenuDetailSheet(props: {
 	menu: Menu | null;
+	allMenuItems: MenuItem[];
 	onClose: () => void;
 	onUpdated: (menu: Menu) => void;
 	onDeleted: (id: string) => void;
@@ -336,7 +343,6 @@ function MenuDetailSheet(props: {
 	const [error, setError] = createSignal<string | null>(null);
 
 	// Item assignments
-	const [allItems, setAllItems] = createSignal<MenuItem[]>([]);
 	const [assignedIds, setAssignedIds] = createSignal<Set<string>>(new Set());
 	const [savingItems, setSavingItems] = createSignal(false);
 	const [itemSearch, setItemSearch] = createSignal("");
@@ -356,11 +362,10 @@ function MenuDetailSheet(props: {
 	});
 
 	const fetchDetails = async (menuId: string) => {
-		const [itemsRes, assignRes] = await Promise.all([
-			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
-			customFetch<{ data: MenuItemAssignment[]; status: number }>(`/api/menus/${menuId}/items`),
-		]);
-		if (itemsRes.status === 200) setAllItems(itemsRes.data);
+		const assignRes = await customFetch<{
+			data: MenuItemAssignment[];
+			status: number;
+		}>(`/api/menus/${menuId}/items`);
 		if (assignRes.status === 200) {
 			setAssignedIds(new Set(assignRes.data.map((a) => a.menu_item_id)));
 		}
@@ -447,14 +452,16 @@ function MenuDetailSheet(props: {
 		}
 	};
 
-	const filteredUnassigned = () => {
+	const filteredUnassigned = createMemo(() => {
 		const q = itemSearch().toLowerCase().trim();
-		return allItems()
+		return props.allMenuItems
 			.filter((item) => !assignedIds().has(item.id))
 			.filter((item) => !q || item.name.toLowerCase().includes(q));
-	};
+	});
 
-	const assignedItems = () => allItems().filter((item) => assignedIds().has(item.id));
+	const assignedItems = createMemo(() =>
+		props.allMenuItems.filter((item) => assignedIds().has(item.id)),
+	);
 
 	return (
 		<Sheet

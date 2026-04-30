@@ -1,4 +1,4 @@
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import type { BundleSlot, BundleSlotOption, MenuItem } from "./types";
@@ -256,15 +256,15 @@ function BundleSlotOptions(props: { itemId: string; slotId: string; allItems: Me
 
 	onMount(fetchOptions);
 
-	const optionItemIds = () => new Set(options().map((o) => o.menu_item_id));
+	const optionItemIds = createMemo(() => new Set(options().map((o) => o.menu_item_id)));
 
-	const availableItems = () => {
+	const availableItems = createMemo(() => {
 		const assigned = optionItemIds();
 		const q = search().toLowerCase().trim();
 		return props.allItems
 			.filter((item) => !assigned.has(item.id) && item.id !== props.itemId)
 			.filter((item) => !q || item.name.toLowerCase().includes(q));
-	};
+	});
 
 	const saveOptions = async (newOptions: BundleSlotOption[]) => {
 		setSaving(true);

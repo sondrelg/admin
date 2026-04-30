@@ -5,7 +5,7 @@ import {
 	DragOverlay,
 	SortableProvider,
 } from "@thisbeyond/solid-dnd";
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,7 +21,7 @@ import { CreateItemDialog } from "./create-item-dialog";
 import { ItemDetailSheet } from "./item-detail-sheet";
 import { ModifierGroupManager } from "./modifier-manager";
 import { SortableItem } from "./sortable-item";
-import type { Category, MenuItem, ModifierGroup } from "./types";
+import type { Allergen, Category, MenuItem, ModifierGroup, TaxRate } from "./types";
 import { formatPrice } from "./types";
 
 export function MenuPage() {
@@ -34,6 +34,8 @@ export function MenuPage() {
 	const [selectedItem, setSelectedItem] = createSignal<MenuItem | null>(null);
 	const [categoriesExpanded, setCategoriesExpanded] = createSignal(false);
 	const [modifierGroups, setModifierGroups] = createSignal<ModifierGroup[]>([]);
+	const [allergens, setAllergens] = createSignal<Allergen[]>([]);
+	const [taxRates, setTaxRates] = createSignal<TaxRate[]>([]);
 	const [modifiersExpanded, setModifiersExpanded] = createSignal(false);
 
 	// Drag-and-drop reordering
@@ -51,14 +53,18 @@ export function MenuPage() {
 	const [filterStatus, setFilterStatus] = createSignal<"all" | "enabled" | "disabled">("all");
 
 	const fetchData = async () => {
-		const [itemsRes, catsRes, modGroupsRes] = await Promise.all([
+		const [itemsRes, catsRes, modGroupsRes, allergensRes, taxRatesRes] = await Promise.all([
 			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
 			customFetch<{ data: Category[]; status: number }>("/api/categories"),
 			customFetch<{ data: ModifierGroup[]; status: number }>("/api/modifier-groups"),
+			customFetch<{ data: Allergen[]; status: number }>("/api/allergens"),
+			customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates"),
 		]);
 		if (itemsRes.status === 200) setItems(itemsRes.data);
 		if (catsRes.status === 200) setCategories(catsRes.data);
 		if (modGroupsRes.status === 200) setModifierGroups(modGroupsRes.data);
+		if (allergensRes.status === 200) setAllergens(allergensRes.data);
+		if (taxRatesRes.status === 200) setTaxRates(taxRatesRes.data);
 		if (itemsRes.status !== 200) {
 			const d = itemsRes.data as unknown as {
 				error?: string;
@@ -223,21 +229,27 @@ export function MenuPage() {
 		const [moved] = reordered.splice(fromIdx, 1);
 		reordered.splice(toIdx, 0, moved);
 
+		// Only update items whose display_order actually changed
+		const changed = reordered
+			.map((item, i) => ({ ...item, display_order: i }))
+			.filter((item) => {
+				const original = catItems.find((o) => o.id === item.id);
+				return original && original.display_order !== item.display_order;
+			});
+
+		if (changed.length === 0) return;
+
 		// Optimistic update
-		const updates = reordered.map((item, i) => ({
-			...item,
-			display_order: i,
-		}));
 		setItems((prev) =>
 			prev.map((item) => {
-				const updated = updates.find((u) => u.id === item.id);
+				const updated = changed.find((u) => u.id === item.id);
 				return updated ?? item;
 			}),
 		);
 
-		// Persist — fire all PUTs in parallel
+		// Persist — fire only changed PUTs in parallel
 		await Promise.all(
-			updates.map((item) =>
+			changed.map((item) =>
 				customFetch(`/api/menu-items/${item.id}`, {
 					method: "PUT",
 					body: JSON.stringify({ display_order: item.display_order }),
@@ -246,15 +258,15 @@ export function MenuPage() {
 		);
 	};
 
-	const categoryMap = () => {
+	const categoryMap = createMemo(() => {
 		const map = new Map<string, Category>();
 		for (const cat of categories()) {
 			map.set(cat.id, cat);
 		}
 		return map;
-	};
+	});
 
-	const filteredItems = () => {
+	const filteredItems = createMemo(() => {
 		let result = items();
 		const q = searchQuery().toLowerCase().trim();
 		if (q) {
@@ -275,12 +287,12 @@ export function MenuPage() {
 			result = result.filter((item) => !item.is_enabled);
 		}
 		return result;
-	};
+	});
 
 	const hasActiveFilters = () =>
 		searchQuery().trim() !== "" || filterCategory() !== "all" || filterStatus() !== "all";
 
-	const groupedItems = () => {
+	const groupedItems = createMemo(() => {
 		const groups = new Map<string | null, MenuItem[]>();
 		for (const item of filteredItems()) {
 			const key = item.category_id;
@@ -292,9 +304,9 @@ export function MenuPage() {
 			list.sort((a, b) => a.display_order - b.display_order);
 		}
 		return groups;
-	};
+	});
 
-	const sortedGroupKeys = () => {
+	const sortedGroupKeys = createMemo(() => {
 		const cats = categories()
 			.filter((c) => c.is_active)
 			.sort((a, b) => a.display_order - b.display_order);
@@ -304,7 +316,7 @@ export function MenuPage() {
 		}
 		if (groupedItems().has(null)) keys.push(null);
 		return keys;
-	};
+	});
 
 	return (
 		<div class="mx-auto max-w-2xl space-y-6">
@@ -637,6 +649,8 @@ export function MenuPage() {
 				item={selectedItem()}
 				categories={categories()}
 				modifierGroups={modifierGroups()}
+				allergens={allergens()}
+				taxRates={taxRates()}
 				allItems={items()}
 				onClose={() => setSelectedItem(null)}
 				onUpdated={handleUpdated}
