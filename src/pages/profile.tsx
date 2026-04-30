@@ -1,11 +1,19 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, For, onMount, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { useAuth } from "~/contexts/auth-context";
+import { createPasskey, isWebAuthnSupported } from "~/lib/webauthn";
+
+interface PasskeySummary {
+	id: string;
+	name: string;
+	created_at: string;
+}
 
 export function ProfilePage() {
 	const { user } = useAuth();
+
 	// Change password
 	const [currentPassword, setCurrentPassword] = createSignal("");
 	const [newPassword, setNewPassword] = createSignal("");
@@ -13,6 +21,101 @@ export function ProfilePage() {
 	const [changingPassword, setChangingPassword] = createSignal(false);
 	const [passwordError, setPasswordError] = createSignal<string | null>(null);
 	const [passwordSuccess, setPasswordSuccess] = createSignal(false);
+
+	// Passkeys
+	const [passkeys, setPasskeys] = createSignal<PasskeySummary[]>([]);
+	const [loadingPasskeys, setLoadingPasskeys] = createSignal(true);
+	const [passkeyName, setPasskeyName] = createSignal("");
+	const [registering, setRegistering] = createSignal(false);
+	const [passkeyError, setPasskeyError] = createSignal<string | null>(null);
+	const [renamingId, setRenamingId] = createSignal<string | null>(null);
+	const [renameValue, setRenameValue] = createSignal("");
+	const [deletingId, setDeletingId] = createSignal<string | null>(null);
+
+	const fetchPasskeys = async () => {
+		const res = await customFetch<{ data: PasskeySummary[]; status: number }>("/api/auth/passkeys");
+		if (res.status === 200) setPasskeys(res.data);
+		setLoadingPasskeys(false);
+	};
+
+	onMount(() => {
+		if (isWebAuthnSupported()) fetchPasskeys();
+		else setLoadingPasskeys(false);
+	});
+
+	const handleRegisterPasskey = async () => {
+		const name = passkeyName().trim() || "My passkey";
+		setPasskeyError(null);
+		setRegistering(true);
+
+		try {
+			const startRes = await customFetch<{
+				data: Record<string, unknown>;
+				status: number;
+			}>("/api/auth/passkeys/register/start", {
+				method: "POST",
+				body: JSON.stringify({ name }),
+			});
+
+			if (startRes.status !== 200) {
+				setPasskeyError("Failed to start passkey registration.");
+				setRegistering(false);
+				return;
+			}
+
+			const credential = await createPasskey(startRes.data);
+
+			const finishRes = await customFetch<{
+				data: PasskeySummary & { message?: string };
+				status: number;
+			}>("/api/auth/passkeys/register/finish", {
+				method: "POST",
+				body: JSON.stringify(credential),
+			});
+
+			if (finishRes.status === 201) {
+				setPasskeys((prev) => [...prev, finishRes.data]);
+				setPasskeyName("");
+			} else {
+				setPasskeyError(finishRes.data?.message ?? "Failed to register passkey.");
+			}
+		} catch (err) {
+			if (err instanceof Error && err.name === "NotAllowedError") {
+				setPasskeyError("Passkey registration was cancelled.");
+			} else {
+				setPasskeyError(err instanceof Error ? err.message : "Passkey registration failed.");
+			}
+		}
+
+		setRegistering(false);
+	};
+
+	const handleRename = async (id: string) => {
+		const name = renameValue().trim();
+		if (!name) return;
+
+		const res = await customFetch<{ status: number }>(`/api/auth/passkeys/${id}`, {
+			method: "PUT",
+			body: JSON.stringify({ name }),
+		});
+
+		if (res.status === 200) {
+			setPasskeys((prev) => prev.map((p) => (p.id === id ? { ...p, name } : p)));
+			setRenamingId(null);
+		}
+	};
+
+	const handleDeletePasskey = async (id: string) => {
+		setDeletingId(id);
+		const res = await customFetch<{ status: number }>(`/api/auth/passkeys/${id}`, {
+			method: "DELETE",
+		});
+		setDeletingId(null);
+
+		if (res.status === 204) {
+			setPasskeys((prev) => prev.filter((p) => p.id !== id));
+		}
+	};
 
 	// Delete account
 	const [showConfirm, setShowConfirm] = createSignal(false);
@@ -157,21 +260,119 @@ export function ProfilePage() {
 				</form>
 			</section>
 
-			{/* Passkeys — stub */}
-			<section class="space-y-4 rounded-xl border bg-card p-6 opacity-60 shadow-sm">
-				<div class="flex items-center justify-between">
-					<h3 class="text-sm font-semibold">Passkeys</h3>
-					<span class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-						Coming soon
-					</span>
-				</div>
+			{/* Passkeys */}
+			<section class="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+				<h3 class="text-sm font-semibold">Passkeys</h3>
 				<p class="text-sm text-muted-foreground">
 					Passkeys let you sign in securely without a password using your device's biometrics or
 					security key.
 				</p>
-				<Button variant="outline" disabled>
-					Register a passkey
-				</Button>
+				<Show
+					when={isWebAuthnSupported()}
+					fallback={
+						<p class="text-xs text-muted-foreground">Your browser does not support passkeys.</p>
+					}
+				>
+					{/* Registered passkeys list */}
+					<Show
+						when={!loadingPasskeys()}
+						fallback={<div class="h-8 animate-pulse rounded bg-muted" />}
+					>
+						<Show when={passkeys().length > 0}>
+							<div class="space-y-2">
+								<For each={passkeys()}>
+									{(pk) => (
+										<div class="flex items-center justify-between rounded-lg border px-3 py-2">
+											<Show
+												when={renamingId() === pk.id}
+												fallback={
+													<div class="min-w-0 flex-1">
+														<p class="truncate text-sm font-medium">{pk.name}</p>
+														<p class="text-xs text-muted-foreground">
+															Added {new Date(pk.created_at).toLocaleDateString()}
+														</p>
+													</div>
+												}
+											>
+												<input
+													type="text"
+													class="flex h-8 flex-1 rounded-md border border-input bg-background px-2 text-sm"
+													value={renameValue()}
+													onInput={(e) => setRenameValue(e.currentTarget.value)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") handleRename(pk.id);
+														if (e.key === "Escape") setRenamingId(null);
+													}}
+												/>
+											</Show>
+											<div class="ml-2 flex shrink-0 items-center gap-1">
+												<Show
+													when={renamingId() === pk.id}
+													fallback={
+														<button
+															type="button"
+															class="text-xs text-muted-foreground hover:text-foreground"
+															onClick={() => {
+																setRenamingId(pk.id);
+																setRenameValue(pk.name);
+															}}
+														>
+															Rename
+														</button>
+													}
+												>
+													<button
+														type="button"
+														class="text-xs text-primary hover:underline"
+														onClick={() => handleRename(pk.id)}
+													>
+														Save
+													</button>
+													<button
+														type="button"
+														class="text-xs text-muted-foreground hover:underline"
+														onClick={() => setRenamingId(null)}
+													>
+														Cancel
+													</button>
+												</Show>
+												<button
+													type="button"
+													class="text-xs text-muted-foreground hover:text-destructive"
+													disabled={deletingId() === pk.id}
+													onClick={() => handleDeletePasskey(pk.id)}
+												>
+													{deletingId() === pk.id ? "..." : "Delete"}
+												</button>
+											</div>
+										</div>
+									)}
+								</For>
+							</div>
+						</Show>
+					</Show>
+
+					<Show when={passkeyError()}>
+						<p class="text-sm text-destructive">{passkeyError()}</p>
+					</Show>
+
+					{/* Register new passkey */}
+					<div class="flex items-center gap-2">
+						<input
+							type="text"
+							class="flex h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+							placeholder="Passkey name (e.g. MacBook Pro)"
+							value={passkeyName()}
+							onInput={(e) => setPasskeyName(e.currentTarget.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") handleRegisterPasskey();
+							}}
+						/>
+						<Button variant="outline" disabled={registering()} onClick={handleRegisterPasskey}>
+							{registering() ? "Registering..." : "Register"}
+						</Button>
+					</div>
+				</Show>
 			</section>
 
 			{/* Danger zone */}

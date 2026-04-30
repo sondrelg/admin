@@ -11,6 +11,7 @@ import { render } from "solid-js/web";
 import "solid-devtools";
 import { createEffect, ErrorBoundary, Show } from "solid-js";
 import { DashboardLayout } from "~/components/dashboard-layout";
+import { PasskeyPrompt } from "~/components/passkey-prompt";
 import { ErrorFallback } from "~/components/ui/error-fallback";
 import { AuthProvider, useAuth } from "~/contexts/auth-context";
 import { useWizard, WizardProvider } from "~/contexts/wizard-context";
@@ -102,7 +103,10 @@ function AuthenticatedHome() {
 			}
 		>
 			<DashboardLayout title={state.tenant?.name ?? "Dashboard"}>
-				<p class="text-muted-foreground">Your POS system is set up and ready.</p>
+				<div class="space-y-6">
+					<PasskeyPrompt />
+					<p class="text-muted-foreground">Your POS system is set up and ready.</p>
+				</div>
 			</DashboardLayout>
 		</Show>
 	);
