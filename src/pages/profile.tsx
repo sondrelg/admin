@@ -6,10 +6,66 @@ import { useAuth } from "~/contexts/auth-context";
 
 export function ProfilePage() {
 	const { user } = useAuth();
+	// Change password
+	const [currentPassword, setCurrentPassword] = createSignal("");
+	const [newPassword, setNewPassword] = createSignal("");
+	const [confirmPassword, setConfirmPassword] = createSignal("");
+	const [changingPassword, setChangingPassword] = createSignal(false);
+	const [passwordError, setPasswordError] = createSignal<string | null>(null);
+	const [passwordSuccess, setPasswordSuccess] = createSignal(false);
+
+	// Delete account
 	const [showConfirm, setShowConfirm] = createSignal(false);
 	const [password, setPassword] = createSignal("");
 	const [deleting, setDeleting] = createSignal(false);
 	const [deleteError, setDeleteError] = createSignal<string | null>(null);
+
+	const handleChangePassword = async (e: Event) => {
+		e.preventDefault();
+		setPasswordError(null);
+		setPasswordSuccess(false);
+
+		if (!currentPassword()) {
+			setPasswordError("Current password is required.");
+			return;
+		}
+		if (!newPassword()) {
+			setPasswordError("New password is required.");
+			return;
+		}
+		if (newPassword() !== confirmPassword()) {
+			setPasswordError("Passwords do not match.");
+			return;
+		}
+
+		setChangingPassword(true);
+
+		const res = await customFetch<{ data?: { message?: string }; status: number }>(
+			"/api/auth/change-password",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					current_password: currentPassword(),
+					new_password: newPassword(),
+				}),
+			},
+		);
+
+		setChangingPassword(false);
+
+		if (res.status === 200) {
+			setPasswordSuccess(true);
+			setCurrentPassword("");
+			setNewPassword("");
+			setConfirmPassword("");
+		} else if (res.status === 401) {
+			setPasswordError("Current password is incorrect.");
+		} else if (res.status === 400) {
+			setPasswordError(res.data?.message ?? "New password is too short.");
+		} else {
+			setPasswordError(res.data?.message ?? "Failed to change password.");
+		}
+	};
 
 	const handleDeleteAccount = async () => {
 		if (!password().trim()) {
@@ -73,29 +129,32 @@ export function ProfilePage() {
 				)}
 			</Show>
 
-			{/* Change password — stub */}
-			<section class="space-y-4 rounded-xl border bg-card p-6 opacity-60 shadow-sm">
-				<div class="flex items-center justify-between">
-					<h3 class="text-sm font-semibold">Change Password</h3>
-					<span class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-						Coming soon
-					</span>
-				</div>
-				<div class="space-y-3">
-					<TextField disabled>
+			{/* Change password */}
+			<section class="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+				<h3 class="text-sm font-semibold">Change Password</h3>
+				<form onSubmit={handleChangePassword} class="space-y-3">
+					<TextField value={currentPassword()} onChange={setCurrentPassword}>
 						<TextFieldLabel>Current password</TextFieldLabel>
-						<TextFieldInput type="password" />
+						<TextFieldInput type="password" autocomplete="current-password" />
 					</TextField>
-					<TextField disabled>
+					<TextField value={newPassword()} onChange={setNewPassword}>
 						<TextFieldLabel>New password</TextFieldLabel>
-						<TextFieldInput type="password" />
+						<TextFieldInput type="password" autocomplete="new-password" />
 					</TextField>
-					<TextField disabled>
+					<TextField value={confirmPassword()} onChange={setConfirmPassword}>
 						<TextFieldLabel>Confirm new password</TextFieldLabel>
-						<TextFieldInput type="password" />
+						<TextFieldInput type="password" autocomplete="new-password" />
 					</TextField>
-				</div>
-				<Button disabled>Update password</Button>
+					<Show when={passwordError()}>
+						<p class="text-sm text-destructive">{passwordError()}</p>
+					</Show>
+					<Show when={passwordSuccess()}>
+						<p class="text-sm text-green-700 dark:text-green-400">Password updated successfully.</p>
+					</Show>
+					<Button type="submit" disabled={changingPassword()}>
+						{changingPassword() ? "Updating..." : "Update password"}
+					</Button>
+				</form>
 			</section>
 
 			{/* Passkeys — stub */}

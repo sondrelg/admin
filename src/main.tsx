@@ -15,11 +15,13 @@ import { ErrorFallback } from "~/components/ui/error-fallback";
 import { AuthProvider, useAuth } from "~/contexts/auth-context";
 import { useWizard, WizardProvider } from "~/contexts/wizard-context";
 import { DevicesPage } from "~/pages/devices";
+import { ForgotPasswordPage } from "~/pages/forgot-password";
 import { LocationsPage } from "~/pages/locations";
 import { LoginPage } from "~/pages/login";
 import { MenuPage } from "~/pages/menu";
 import { MenusPage } from "~/pages/menus";
 import { ProfilePage } from "~/pages/profile";
+import { ResetPasswordPage } from "~/pages/reset-password";
 import { BusinessPage } from "~/pages/setup/business";
 import { MenuPage as SetupMenuPage } from "~/pages/setup/menu";
 import { StaffPage as SetupStaffPage } from "~/pages/setup/staff";
@@ -252,10 +254,27 @@ const signUpRoute = createRoute({
 	component: SignUpPage,
 });
 
+const forgotPasswordRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/forgot-password",
+	component: ForgotPasswordPage,
+});
+
+const resetPasswordRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/reset-password",
+	component: ResetPasswordPage,
+	validateSearch: (search: Record<string, unknown>) => ({
+		token: (search.token as string) ?? "",
+	}),
+});
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	loginRoute,
 	signUpRoute,
+	forgotPasswordRoute,
+	resetPasswordRoute,
 	menuRoute,
 	menusRoute,
 	devicesRoute,

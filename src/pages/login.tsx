@@ -77,14 +77,24 @@ export function LoginPage() {
 							/>
 						</TextField>
 
-						<TextField value={password()} onChange={setPassword}>
-							<TextFieldLabel>Password</TextFieldLabel>
-							<TextFieldInput
-								type="password"
-								placeholder="Enter your password"
-								autocomplete="current-password"
-							/>
-						</TextField>
+						<div class="space-y-1.5">
+							<TextField value={password()} onChange={setPassword}>
+								<TextFieldLabel>Password</TextFieldLabel>
+								<TextFieldInput
+									type="password"
+									placeholder="Enter your password"
+									autocomplete="current-password"
+								/>
+							</TextField>
+							<div class="text-right">
+								<Link
+									to="/forgot-password"
+									class="text-xs text-muted-foreground hover:text-primary"
+								>
+									Forgot password?
+								</Link>
+							</div>
+						</div>
 
 						<Show when={error()}>
 							<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error()}</div>
