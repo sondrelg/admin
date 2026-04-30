@@ -1,4 +1,4 @@
-export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8085";
+export const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 const TENANT_HEADER = "X-Tenant-ID";
 const IDEMPOTENCY_HEADER = "Idempotency-Key";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
