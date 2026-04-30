@@ -25,6 +25,7 @@
 - Don't hard code colors
 - Don't use `div`s if we have a component already
 - Don't return new object literals or inline maps/arrays from reactive declarations when exporting shared state. This can cause unnecessary invalidations and effects to re-run.
+- Don't add cookie banners or consent dialogs. We only use session cookies for authentication (no analytics, tracking, or third-party cookies), so no consent is required under GDPR/ePrivacy.
 
 
 ## Before finishing a change

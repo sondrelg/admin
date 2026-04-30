@@ -19,6 +19,7 @@ import { LocationsPage } from "~/pages/locations";
 import { LoginPage } from "~/pages/login";
 import { MenuPage } from "~/pages/menu";
 import { MenusPage } from "~/pages/menus";
+import { ProfilePage } from "~/pages/profile";
 import { BusinessPage } from "~/pages/setup/business";
 import { MenuPage as SetupMenuPage } from "~/pages/setup/menu";
 import { StaffPage as SetupStaffPage } from "~/pages/setup/staff";
@@ -225,6 +226,20 @@ const taxRatesRoute = createRoute({
 	component: DashboardTaxRates,
 });
 
+function DashboardProfile() {
+	return (
+		<DashboardLayout title="Profile">
+			<ProfilePage />
+		</DashboardLayout>
+	);
+}
+
+const profileRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/profile",
+	component: DashboardProfile,
+});
+
 const loginRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/login",
@@ -247,6 +262,7 @@ const routeTree = rootRoute.addChildren([
 	staffRoute,
 	locationsRoute,
 	taxRatesRoute,
+	profileRoute,
 	setupBusinessRoute,
 	setupStaffRoute,
 	setupTaxRatesRoute,
