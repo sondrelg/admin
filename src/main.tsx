@@ -15,6 +15,7 @@ import { PasskeyPrompt } from "~/components/passkey-prompt";
 import { ErrorFallback } from "~/components/ui/error-fallback";
 import { AuthProvider, useAuth } from "~/contexts/auth-context";
 import { useWizard, WizardProvider } from "~/contexts/wizard-context";
+import { ApiTokensPage } from "~/pages/api-tokens";
 import { DevicesPage } from "~/pages/devices";
 import { ForgotPasswordPage } from "~/pages/forgot-password";
 import { LocationsPage } from "~/pages/locations";
@@ -235,6 +236,20 @@ const taxRatesRoute = createRoute({
 	component: DashboardTaxRates,
 });
 
+function DashboardApiTokens() {
+	return (
+		<DashboardLayout title="API Tokens">
+			<ApiTokensPage />
+		</DashboardLayout>
+	);
+}
+
+const apiTokensRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/api-tokens",
+	component: DashboardApiTokens,
+});
+
 function DashboardProfile() {
 	return (
 		<DashboardLayout title="Profile">
@@ -288,6 +303,7 @@ const routeTree = rootRoute.addChildren([
 	staffRoute,
 	locationsRoute,
 	taxRatesRoute,
+	apiTokensRoute,
 	profileRoute,
 	setupBusinessRoute,
 	setupStaffRoute,
