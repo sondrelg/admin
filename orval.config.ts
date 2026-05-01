@@ -5,8 +5,8 @@ export default defineConfig({
     input: {
       target: '../backend/openapi.json',
       filters: {
-        mode: 'exclude',
-        tags: [/^POS:/],
+        mode: 'include',
+        tags: ['admin'],
       },
     },
     output: {

@@ -6,11 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 import type {
-  ActivateDevice,
   ActivationCodeResponse,
   CreateActivationCode,
   DeviceResponse,
-  DeviceTokenResponse,
   UpdateDevice
 } from '../../models';
 
@@ -44,46 +42,6 @@ export const listDevices = async ( options?: RequestInit): Promise<listDevicesRe
     method: 'GET'
     
     
-  }
-);}
-
-
-export type activateDeviceResponse200 = {
-  data: DeviceTokenResponse
-  status: 200
-}
-
-export type activateDeviceResponse400 = {
-  data: void
-  status: 400
-}
-    
-export type activateDeviceResponseSuccess = (activateDeviceResponse200) & {
-  headers: Headers;
-};
-export type activateDeviceResponseError = (activateDeviceResponse400) & {
-  headers: Headers;
-};
-
-export type activateDeviceResponse = (activateDeviceResponseSuccess | activateDeviceResponseError)
-
-export const getActivateDeviceUrl = () => {
-
-
-  
-
-  return `/api/devices/activate`
-}
-
-export const activateDevice = async (activateDevice: ActivateDevice, options?: RequestInit): Promise<activateDeviceResponse> => {
-  
-  return customFetch<activateDeviceResponse>(getActivateDeviceUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      activateDevice,)
   }
 );}
 
