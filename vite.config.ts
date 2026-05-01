@@ -1,14 +1,13 @@
-import path from "node:path";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import devtools from "solid-devtools/vite";
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [devtools(), solid()],
+  plugins: [tailwindcss(), devtools(), solid()],
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "./src"),
+      "~": `${import.meta.dirname}/src`,
     },
   },
   server: {
