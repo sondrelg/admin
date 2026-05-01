@@ -2,6 +2,7 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
+import { formatDate, formatDateTime } from "~/lib/datetime";
 
 interface ApiToken {
 	id: string;
@@ -21,14 +22,6 @@ function deriveStatus(token: ApiToken): TokenStatus {
 	if (!token.is_active) return "revoked";
 	if (token.expires_at && new Date(token.expires_at) < new Date()) return "expired";
 	return "active";
-}
-
-function formatDate(iso: string) {
-	return new Date(iso).toLocaleDateString();
-}
-
-function formatDateTime(iso: string) {
-	return new Date(iso).toLocaleString();
 }
 
 function StatusBadge(props: { status: TokenStatus }) {

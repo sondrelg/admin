@@ -3,7 +3,6 @@ import { createSignal, For, Show } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
-import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
 import { restaurantCafe } from "~/templates/restaurant-cafe";

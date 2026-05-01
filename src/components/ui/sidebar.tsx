@@ -2,11 +2,14 @@ import type { PolymorphicProps } from "@kobalte/core";
 import { Polymorphic } from "@kobalte/core";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import type { Accessor, Component, ComponentProps, JSX, ValidComponent } from "solid-js";
 import {
+	type Accessor,
+	type Component,
+	type ComponentProps,
 	createContext,
 	createMemo,
 	createSignal,
+	type JSX,
 	Match,
 	mergeProps,
 	onCleanup,
@@ -15,6 +18,7 @@ import {
 	Switch,
 	splitProps,
 	useContext,
+	type ValidComponent,
 } from "solid-js";
 import type { ButtonProps } from "~/components/ui/button";
 import { Button } from "~/components/ui/button";
@@ -606,7 +610,9 @@ const SidebarMenuSkeleton: Component<SidebarMenuSkeletonProps> = (rawProps) => {
 			class={cn("flex h-8 items-center gap-2 rounded-md px-2", local.class)}
 			{...others}
 		>
-			{local.showIcon && <Skeleton class="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />}
+			<Show when={local.showIcon}>
+				<Skeleton class="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />
+			</Show>
 			<Skeleton
 				class="max-w-(--skeleton-width) h-4 flex-1"
 				data-sidebar="menu-skeleton-text"

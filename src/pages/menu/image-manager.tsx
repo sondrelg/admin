@@ -13,6 +13,7 @@ export function ImageManager(props: { itemId: string }) {
 	const [loading, setLoading] = createSignal(true);
 	const [uploading, setUploading] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
+	// eslint-disable-next-line no-unassigned-vars -- SolidJS ref assigned via JSX
 	let fileInput!: HTMLInputElement;
 
 	const fetchImages = async () => {

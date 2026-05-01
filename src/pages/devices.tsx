@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 } from "~/components/ui/dialog";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
+import { formatDate, formatRelative } from "~/lib/datetime";
 
 interface Device {
 	id: string;
@@ -25,21 +26,6 @@ interface ActivationCode {
 	code: string;
 	expires_at: string;
 	device_id: string;
-}
-
-function formatRelative(iso: string | null): string {
-	if (!iso) return "Never";
-	const d = new Date(iso);
-	const now = Date.now();
-	const diffMs = now - d.getTime();
-	const diffMin = Math.floor(diffMs / 60_000);
-	if (diffMin < 1) return "Just now";
-	if (diffMin < 60) return `${diffMin}m ago`;
-	const diffHrs = Math.floor(diffMin / 60);
-	if (diffHrs < 24) return `${diffHrs}h ago`;
-	const diffDays = Math.floor(diffHrs / 24);
-	if (diffDays < 30) return `${diffDays}d ago`;
-	return d.toLocaleDateString();
 }
 
 export function DevicesPage() {
@@ -427,9 +413,7 @@ function ManageDeviceDialog(props: {
 									<Show when={device().activated_at}>
 										<div>
 											<p class="text-muted-foreground">Activated</p>
-											<p class="font-medium">
-												{new Date(device().activated_at!).toLocaleDateString()}
-											</p>
+											<p class="font-medium">{formatDate(device().activated_at!)}</p>
 										</div>
 									</Show>
 								</div>

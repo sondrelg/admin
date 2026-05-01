@@ -3,6 +3,7 @@ import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { useAuth } from "~/contexts/auth-context";
+import { formatDate } from "~/lib/datetime";
 import { createPasskey, isWebAuthnSupported } from "~/lib/webauthn";
 
 interface PasskeySummary {
@@ -289,7 +290,7 @@ export function ProfilePage() {
 													<div class="min-w-0 flex-1">
 														<p class="truncate text-sm font-medium">{pk.name}</p>
 														<p class="text-xs text-muted-foreground">
-															Added {new Date(pk.created_at).toLocaleDateString()}
+															Added {formatDate(pk.created_at)}
 														</p>
 													</div>
 												}
