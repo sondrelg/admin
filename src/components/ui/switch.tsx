@@ -32,5 +32,5 @@ const Switch = (props: SwitchProps) => {
 	);
 };
 
-export { Switch };
 export type { SwitchProps };
+export { Switch };

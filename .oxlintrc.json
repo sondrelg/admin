@@ -24,16 +24,15 @@
     "react/react-in-jsx-scope": "off",
     "react/no-children-prop": "error",
     "react/no-danger-with-children": "error",
-    "react/no-deprecated": "warn",
     "react/void-dom-elements-no-children": "error",
     "unicorn/prefer-node-protocol": "off",
     "unicorn/no-array-for-each": "warn",
     "unicorn/no-useless-spread": "off",
     "unicorn/no-array-sort": "off",
     "unicorn/no-null": "off",
-    "unicorn/prevent-abbreviations": "off",
     "jsx-a11y/label-has-associated-control": "off",
-    "no-unused-vars": "off"
+    "no-unused-vars": "off",
+    "no-shadow": "off"
   },
   "overrides": [
     {
