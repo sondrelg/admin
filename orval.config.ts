@@ -5,20 +5,8 @@ export default defineConfig({
     input: {
       target: '../backend/openapi.json',
       filters: {
-        tags: [
-          'Auth',
-          'Devices',
-          'Health',
-          'Inventory',
-          'Locations',
-          'Menu',
-          'Registers',
-          'Staff',
-          'Tax Rates',
-          'Telemetry',
-          'Tenants',
-          'Webhooks',
-        ],
+        mode: 'exclude',
+        tags: [/^POS:/],
       },
     },
     output: {
