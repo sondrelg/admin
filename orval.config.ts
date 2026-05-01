@@ -2,7 +2,25 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   smlsApi: {
-    input: '../backend/openapi.json',
+    input: {
+      target: '../backend/openapi.json',
+      filters: {
+        tags: [
+          'Auth',
+          'Devices',
+          'Health',
+          'Inventory',
+          'Locations',
+          'Menu',
+          'Registers',
+          'Staff',
+          'Tax Rates',
+          'Telemetry',
+          'Tenants',
+          'Webhooks',
+        ],
+      },
+    },
     output: {
       mode: 'tags-split',
       target: './src/api/generated',
