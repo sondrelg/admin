@@ -10,7 +10,7 @@ import {
 } from "@opentelemetry/sdk-trace-base";
 import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import { BASE_URL, resolveApiUrl } from "~/api/client";
+import { resolveApiUrl } from "~/api/client";
 
 let initialized = false;
 
@@ -38,16 +38,10 @@ export function initTelemetry() {
 
 	provider.register();
 
-	const corsUrls: RegExp[] = [];
-	if (BASE_URL) {
-		corsUrls.push(new RegExp(`^${escapeRegExp(BASE_URL)}`));
-	}
-
 	registerInstrumentations({
 		tracerProvider: provider,
 		instrumentations: [
 			new FetchInstrumentation({
-				propagateTraceHeaderCorsUrls: corsUrls,
 				ignoreUrls: [resolveApiUrl(TELEMETRY_PATH)],
 			}),
 		],
@@ -59,8 +53,4 @@ export function initTelemetry() {
  */
 export function getTracer(name = "smls-admin") {
 	return trace.getTracer(name);
-}
-
-function escapeRegExp(s: string): string {
-	return s.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
