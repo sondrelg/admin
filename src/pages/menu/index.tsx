@@ -24,7 +24,7 @@ import { SortableItem } from "./sortable-item";
 import type { Allergen, Category, MenuItem, ModifierGroup, TaxRate } from "./types";
 import { formatPrice } from "./types";
 
-export function MenuPage() {
+export default function MenuPage() {
 	const [items, setItems] = createSignal<MenuItem[]>([]);
 	const [categories, setCategories] = createSignal<Category[]>([]);
 	const [loading, setLoading] = createSignal(true);

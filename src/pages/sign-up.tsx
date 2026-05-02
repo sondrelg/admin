@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { useAuth } from "~/contexts/auth-context";
 
-export function SignUpPage() {
+export default function SignUpPage() {
 	const navigate = useNavigate();
 	const { signUp } = useAuth();
 

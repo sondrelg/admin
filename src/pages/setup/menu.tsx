@@ -20,7 +20,7 @@ interface Category {
 	collapsed: boolean;
 }
 
-export function MenuPage() {
+export default function MenuPage() {
 	const navigate = useNavigate();
 	const { state, setCategories, setMenuItemCount } = useWizard();
 

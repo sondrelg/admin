@@ -9,33 +9,43 @@ import {
 } from "@tanstack/solid-router";
 import { render } from "solid-js/web";
 import "solid-devtools";
-import { createEffect, ErrorBoundary, Show } from "solid-js";
+import { createEffect, ErrorBoundary, lazy, Show, Suspense } from "solid-js";
 import { DashboardLayout } from "~/components/dashboard-layout";
 import { PasskeyPrompt } from "~/components/passkey-prompt";
 import { ErrorFallback } from "~/components/ui/error-fallback";
 import { AuthProvider, useAuth } from "~/contexts/auth-context";
 import { useWizard, WizardProvider } from "~/contexts/wizard-context";
-import { ApiTokensPage } from "~/pages/api-tokens";
-import { DevicesPage } from "~/pages/devices";
-import { ForgotPasswordPage } from "~/pages/forgot-password";
-import { LocationsPage } from "~/pages/locations";
-import { LoginPage } from "~/pages/login";
-import { MenuPage } from "~/pages/menu";
-import { MenusPage } from "~/pages/menus";
-import { ProfilePage } from "~/pages/profile";
-import { ResetPasswordPage } from "~/pages/reset-password";
-import { BusinessPage } from "~/pages/setup/business";
-import { MenuPage as SetupMenuPage } from "~/pages/setup/menu";
-import { StaffPage as SetupStaffPage } from "~/pages/setup/staff";
-import { SummaryPage } from "~/pages/setup/summary";
-import { TaxRatesPage as SetupTaxRatesPage } from "~/pages/setup/tax-rates";
-import { SignUpPage } from "~/pages/sign-up";
-import { StaffPage } from "~/pages/staff";
-import { TaxRatesPage } from "~/pages/tax-rates";
 import { initTelemetry } from "~/telemetry";
 import "./styles.css";
 
+// Lazy-loaded page components
+const ApiTokensPage = lazy(() => import("~/pages/api-tokens"));
+const DevicesPage = lazy(() => import("~/pages/devices"));
+const ForgotPasswordPage = lazy(() => import("~/pages/forgot-password"));
+const LocationsPage = lazy(() => import("~/pages/locations"));
+const LoginPage = lazy(() => import("~/pages/login"));
+const MenuPage = lazy(() => import("~/pages/menu"));
+const MenusPage = lazy(() => import("~/pages/menus"));
+const ProfilePage = lazy(() => import("~/pages/profile"));
+const ResetPasswordPage = lazy(() => import("~/pages/reset-password"));
+const SignUpPage = lazy(() => import("~/pages/sign-up"));
+const StaffPage = lazy(() => import("~/pages/staff"));
+const TaxRatesPage = lazy(() => import("~/pages/tax-rates"));
+const SetupBusinessPage = lazy(() => import("~/pages/setup/business"));
+const SetupStaffPage = lazy(() => import("~/pages/setup/staff"));
+const SetupTaxRatesPage = lazy(() => import("~/pages/setup/tax-rates"));
+const SetupMenuPage = lazy(() => import("~/pages/setup/menu"));
+const SetupSummaryPage = lazy(() => import("~/pages/setup/summary"));
+
 initTelemetry();
+
+function PageLoading() {
+	return (
+		<div class="flex min-h-[200px] items-center justify-center">
+			<p class="text-muted-foreground">Loading...</p>
+		</div>
+	);
+}
 
 const rootRoute = createRootRoute({
 	component: RootComponent,
@@ -125,31 +135,51 @@ const indexRoute = createRoute({
 const setupBusinessRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/setup/business",
-	component: BusinessPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<SetupBusinessPage />
+		</Suspense>
+	),
 });
 
 const setupStaffRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/setup/staff",
-	component: SetupStaffPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<SetupStaffPage />
+		</Suspense>
+	),
 });
 
 const setupTaxRatesRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/setup/tax-rates",
-	component: SetupTaxRatesPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<SetupTaxRatesPage />
+		</Suspense>
+	),
 });
 
 const setupMenuRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/setup/menu",
-	component: SetupMenuPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<SetupMenuPage />
+		</Suspense>
+	),
 });
 
 const setupSummaryRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/setup/summary",
-	component: SummaryPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<SetupSummaryPage />
+		</Suspense>
+	),
 });
 
 function DashboardMenu() {
@@ -267,25 +297,41 @@ const profileRoute = createRoute({
 const loginRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/login",
-	component: LoginPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<LoginPage />
+		</Suspense>
+	),
 });
 
 const signUpRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/sign-up",
-	component: SignUpPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<SignUpPage />
+		</Suspense>
+	),
 });
 
 const forgotPasswordRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/forgot-password",
-	component: ForgotPasswordPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<ForgotPasswordPage />
+		</Suspense>
+	),
 });
 
 const resetPasswordRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/reset-password",
-	component: ResetPasswordPage,
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
+			<ResetPasswordPage />
+		</Suspense>
+	),
 	validateSearch: (search: Record<string, unknown>) => ({
 		token: (search.token as string) ?? "",
 	}),

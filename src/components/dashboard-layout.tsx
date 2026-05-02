@@ -1,4 +1,4 @@
-import { ErrorBoundary, type JSX } from "solid-js";
+import { ErrorBoundary, type JSX, Suspense } from "solid-js";
 import { AppSidebar } from "~/components/app-sidebar";
 import { ErrorFallback } from "~/components/ui/error-fallback";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
@@ -19,7 +19,15 @@ export function DashboardLayout(props: { title: string; children: JSX.Element })
 						</div>
 					)}
 				>
-					<div class="p-6">{props.children}</div>
+					<Suspense
+						fallback={
+							<div class="flex min-h-[200px] items-center justify-center p-6">
+								<p class="text-muted-foreground">Loading...</p>
+							</div>
+						}
+					>
+						<div class="p-6">{props.children}</div>
+					</Suspense>
 				</ErrorBoundary>
 			</SidebarInset>
 		</SidebarProvider>

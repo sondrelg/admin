@@ -7,7 +7,7 @@ import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
 import { slugify } from "~/lib/slug";
 
-export function BusinessPage() {
+export default function BusinessPage() {
 	const navigate = useNavigate();
 	const { state, setTenant, setLocation, reset } = useWizard();
 

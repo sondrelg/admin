@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
 
-export function SummaryPage() {
+export default function SummaryPage() {
 	const { state, setRegisterId } = useWizard();
 	const [error, setError] = createSignal<string | null>(null);
 	const [isCreatingRegister, setIsCreatingRegister] = createSignal(false);

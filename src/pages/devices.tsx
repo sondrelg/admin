@@ -28,7 +28,7 @@ interface ActivationCode {
 	device_id: string;
 }
 
-export function DevicesPage() {
+export default function DevicesPage() {
 	const [devices, setDevices] = createSignal<Device[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);

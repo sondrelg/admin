@@ -16,7 +16,7 @@ const ROLE_LABELS: Record<string, string> = {
 	Admin: "Admin",
 };
 
-export function StaffPage() {
+export default function StaffPage() {
 	const [staff, setStaff] = createSignal<StaffMember[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);

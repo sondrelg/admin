@@ -30,7 +30,7 @@ const percentToBps = (pct: string) => {
 	return Math.round(num * 100);
 };
 
-export function TaxRatesPage() {
+export default function TaxRatesPage() {
 	const [rows, setRows] = createStore<TaxRateRow[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	const [saving, setSaving] = createSignal(false);

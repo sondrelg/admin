@@ -12,7 +12,7 @@ interface PasskeySummary {
 	created_at: string;
 }
 
-export function ProfilePage() {
+export default function ProfilePage() {
 	const { user } = useAuth();
 
 	// Change password

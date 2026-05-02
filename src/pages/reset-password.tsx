@@ -4,7 +4,7 @@ import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
-export function ResetPasswordPage() {
+export default function ResetPasswordPage() {
 	const search = useSearch({ from: "/reset-password" });
 	const token = () => search().token;
 

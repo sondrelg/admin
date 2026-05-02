@@ -4,7 +4,7 @@ import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
-export function ForgotPasswordPage() {
+export default function ForgotPasswordPage() {
 	const [email, setEmail] = createSignal("");
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [sent, setSent] = createSignal(false);

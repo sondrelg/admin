@@ -39,7 +39,7 @@ function StatusBadge(props: { status: TokenStatus }) {
 	);
 }
 
-export function ApiTokensPage() {
+export default function ApiTokensPage() {
 	const [tokens, setTokens] = createSignal<ApiToken[]>([]);
 	const [loading, setLoading] = createSignal(true);
 

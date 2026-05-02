@@ -24,7 +24,7 @@ const percentToBps = (pct: string) => {
 	return Math.round(num * 100);
 };
 
-export function TaxRatesPage() {
+export default function TaxRatesPage() {
 	const navigate = useNavigate();
 	const { state, setTaxRates } = useWizard();
 

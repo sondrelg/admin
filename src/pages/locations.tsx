@@ -52,7 +52,7 @@ function parsePriceToMinor(input: string): number {
 	return Math.round(num * 100);
 }
 
-export function LocationsPage() {
+export default function LocationsPage() {
 	const [locations, setLocations] = createSignal<Location[]>([]);
 	const [menuItems, setMenuItems] = createSignal<MenuItem[]>([]);
 	const [loading, setLoading] = createSignal(true);

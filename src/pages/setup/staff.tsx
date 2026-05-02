@@ -6,7 +6,7 @@ import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-
 import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
 
-export function StaffPage() {
+export default function StaffPage() {
 	const navigate = useNavigate();
 	const { state, setStaff } = useWizard();
 

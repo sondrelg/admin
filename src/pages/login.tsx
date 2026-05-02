@@ -6,7 +6,7 @@ import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-
 import { useAuth } from "~/contexts/auth-context";
 import { authenticatePasskey, isWebAuthnSupported } from "~/lib/webauthn";
 
-export function LoginPage() {
+export default function LoginPage() {
 	const navigate = useNavigate();
 	const { signIn, refreshMe } = useAuth();
 

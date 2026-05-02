@@ -102,7 +102,7 @@ function formatPrice(minorUnit: number): string {
 	return `${sign}${major},${minor.toString().padStart(2, "0")}`;
 }
 
-export function MenusPage() {
+export default function MenusPage() {
 	const [menus, setMenus] = createSignal<Menu[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);
