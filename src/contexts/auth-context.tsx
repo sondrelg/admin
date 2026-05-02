@@ -1,4 +1,4 @@
-import { createContext, createSignal, type JSX, onMount, useContext } from "solid-js";
+import { createContext, createSignal, type JSX, useContext } from "solid-js";
 import { customFetch } from "~/api/client";
 
 export interface AuthUser {
@@ -17,10 +17,10 @@ interface AuthContextValue {
 	user: () => AuthUser | null;
 	tenants: () => AuthTenant[];
 	loading: () => boolean;
-	signUp: (email: string, password: string, name: string) => Promise<string | null>;
-	signIn: (email: string, password: string) => Promise<string | null>;
 	signOut: () => Promise<void>;
 	refreshMe: () => Promise<void>;
+	/** Fetch /api/auth/me once. No-ops on subsequent calls. Used by AuthGuard. */
+	checkAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue>();
@@ -29,6 +29,7 @@ export function AuthProvider(props: { children: JSX.Element }) {
 	const [user, setUser] = createSignal<AuthUser | null>(null);
 	const [tenants, setTenants] = createSignal<AuthTenant[]>([]);
 	const [loading, setLoading] = createSignal(true);
+	let checked = false;
 
 	async function refreshMe() {
 		try {
@@ -50,43 +51,10 @@ export function AuthProvider(props: { children: JSX.Element }) {
 		}
 	}
 
-	onMount(async () => {
-		await refreshMe();
-		setLoading(false);
-	});
-
-	async function signUp(email: string, password: string, name: string): Promise<string | null> {
-		const res = await customFetch<{
-			data: { user?: AuthUser; error?: string; message?: string };
-			status: number;
-		}>("/api/auth/sign-up", {
-			method: "POST",
-			body: JSON.stringify({ email, password, name }),
-		});
-
-		if (res.status === 201) {
-			if (res.data.user) setUser(res.data.user);
-			return null;
-		}
-
-		return res.data?.error ?? res.data?.message ?? "Sign up failed";
-	}
-
-	async function signIn(email: string, password: string): Promise<string | null> {
-		const res = await customFetch<{
-			data: { user?: AuthUser; error?: string; message?: string };
-			status: number;
-		}>("/api/auth/sign-in", {
-			method: "POST",
-			body: JSON.stringify({ email, password }),
-		});
-
-		if (res.status === 200) {
-			if (res.data.user) setUser(res.data.user);
-			return null;
-		}
-
-		return res.data?.error ?? res.data?.message ?? "Sign in failed";
+	function checkAuth() {
+		if (checked) return;
+		checked = true;
+		refreshMe().then(() => setLoading(false));
 	}
 
 	async function signOut() {
@@ -99,10 +67,9 @@ export function AuthProvider(props: { children: JSX.Element }) {
 		user,
 		tenants,
 		loading,
-		signUp,
-		signIn,
 		signOut,
 		refreshMe,
+		checkAuth,
 	};
 
 	return <AuthContext.Provider value={ctx}>{props.children}</AuthContext.Provider>;

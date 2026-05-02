@@ -47,8 +47,16 @@ function PageLoading() {
 	);
 }
 
+// ---------------------------------------------------------------------------
+// Root
+// ---------------------------------------------------------------------------
+
 const rootRoute = createRootRoute({
-	component: RootComponent,
+	component: () => (
+		<main class="min-h-screen bg-background">
+			<Outlet />
+		</main>
+	),
 	errorComponent: (props) => <ErrorFallback error={props.error} reset={props.reset} fullPage />,
 	notFoundComponent: () => (
 		<div class="p-4">
@@ -60,17 +68,66 @@ const rootRoute = createRootRoute({
 	),
 });
 
-function RootComponent() {
-	return (
-		<main class="min-h-screen bg-background">
+// ---------------------------------------------------------------------------
+// Public layout — no auth check, renders immediately
+// ---------------------------------------------------------------------------
+
+const publicLayout = createRoute({
+	getParentRoute: () => rootRoute,
+	id: "public",
+	component: () => (
+		<Suspense fallback={<PageLoading />}>
 			<Outlet />
-		</main>
+		</Suspense>
+	),
+});
+
+const loginRoute = createRoute({
+	getParentRoute: () => publicLayout,
+	path: "/login",
+	component: () => <LoginPage />,
+});
+
+const signUpRoute = createRoute({
+	getParentRoute: () => publicLayout,
+	path: "/sign-up",
+	component: () => <SignUpPage />,
+});
+
+const forgotPasswordRoute = createRoute({
+	getParentRoute: () => publicLayout,
+	path: "/forgot-password",
+	component: () => <ForgotPasswordPage />,
+});
+
+const resetPasswordRoute = createRoute({
+	getParentRoute: () => publicLayout,
+	path: "/reset-password",
+	component: () => <ResetPasswordPage />,
+	validateSearch: (search: Record<string, unknown>) => ({
+		token: (search.token as string) ?? "",
+	}),
+});
+
+// ---------------------------------------------------------------------------
+// Authed layout — guards routes, triggers auth check
+// ---------------------------------------------------------------------------
+
+function AuthedLayout() {
+	return (
+		<AuthProvider>
+			<WizardProvider>
+				<AuthGuard />
+			</WizardProvider>
+		</AuthProvider>
 	);
 }
 
-function HomePage() {
-	const { user, loading } = useAuth();
+function AuthGuard() {
+	const { user, loading, checkAuth } = useAuth();
 	const navigate = useNavigate();
+
+	checkAuth();
 
 	createEffect(() => {
 		if (!loading() && !user()) {
@@ -88,13 +145,23 @@ function HomePage() {
 			}
 		>
 			<Show when={user()}>
-				<AuthenticatedHome />
+				<Outlet />
 			</Show>
 		</Show>
 	);
 }
 
-function AuthenticatedHome() {
+const authedLayout = createRoute({
+	getParentRoute: () => rootRoute,
+	id: "authed",
+	component: AuthedLayout,
+});
+
+// ---------------------------------------------------------------------------
+// Home (authed)
+// ---------------------------------------------------------------------------
+
+function HomePage() {
 	const { user } = useAuth();
 	const { state, isComplete } = useWizard();
 
@@ -127,13 +194,17 @@ function AuthenticatedHome() {
 }
 
 const indexRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authedLayout,
 	path: "/",
 	component: HomePage,
 });
 
+// ---------------------------------------------------------------------------
+// Setup routes (authed)
+// ---------------------------------------------------------------------------
+
 const setupBusinessRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authedLayout,
 	path: "/setup/business",
 	component: () => (
 		<Suspense fallback={<PageLoading />}>
@@ -143,7 +214,7 @@ const setupBusinessRoute = createRoute({
 });
 
 const setupStaffRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authedLayout,
 	path: "/setup/staff",
 	component: () => (
 		<Suspense fallback={<PageLoading />}>
@@ -153,7 +224,7 @@ const setupStaffRoute = createRoute({
 });
 
 const setupTaxRatesRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authedLayout,
 	path: "/setup/tax-rates",
 	component: () => (
 		<Suspense fallback={<PageLoading />}>
@@ -163,7 +234,7 @@ const setupTaxRatesRoute = createRoute({
 });
 
 const setupMenuRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authedLayout,
 	path: "/setup/menu",
 	component: () => (
 		<Suspense fallback={<PageLoading />}>
@@ -173,7 +244,7 @@ const setupMenuRoute = createRoute({
 });
 
 const setupSummaryRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authedLayout,
 	path: "/setup/summary",
 	component: () => (
 		<Suspense fallback={<PageLoading />}>
@@ -182,180 +253,112 @@ const setupSummaryRoute = createRoute({
 	),
 });
 
-function DashboardMenu() {
-	return (
+// ---------------------------------------------------------------------------
+// Dashboard routes (authed)
+// ---------------------------------------------------------------------------
+
+const menuRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/menu",
+	component: () => (
 		<DashboardLayout title="Menu">
 			<MenuPage />
 		</DashboardLayout>
-	);
-}
-
-const menuRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/menu",
-	component: DashboardMenu,
+	),
 });
 
-function DashboardMenus() {
-	return (
+const menusRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/menus",
+	component: () => (
 		<DashboardLayout title="Menus">
 			<MenusPage />
 		</DashboardLayout>
-	);
-}
-
-const menusRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/menus",
-	component: DashboardMenus,
+	),
 });
 
-function DashboardDevices() {
-	return (
+const devicesRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/devices",
+	component: () => (
 		<DashboardLayout title="Devices">
 			<DevicesPage />
 		</DashboardLayout>
-	);
-}
-
-const devicesRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/devices",
-	component: DashboardDevices,
+	),
 });
 
-function DashboardStaff() {
-	return (
+const staffRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/staff",
+	component: () => (
 		<DashboardLayout title="Staff">
 			<StaffPage />
 		</DashboardLayout>
-	);
-}
-
-const staffRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/staff",
-	component: DashboardStaff,
+	),
 });
 
-function DashboardLocations() {
-	return (
+const locationsRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/locations",
+	component: () => (
 		<DashboardLayout title="Locations">
 			<LocationsPage />
 		</DashboardLayout>
-	);
-}
-
-const locationsRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/locations",
-	component: DashboardLocations,
+	),
 });
 
-function DashboardTaxRates() {
-	return (
+const taxRatesRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/tax-rates",
+	component: () => (
 		<DashboardLayout title="Tax Rates">
 			<TaxRatesPage />
 		</DashboardLayout>
-	);
-}
-
-const taxRatesRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/tax-rates",
-	component: DashboardTaxRates,
+	),
 });
 
-function DashboardApiTokens() {
-	return (
+const apiTokensRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/api-tokens",
+	component: () => (
 		<DashboardLayout title="API Tokens">
 			<ApiTokensPage />
 		</DashboardLayout>
-	);
-}
-
-const apiTokensRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/api-tokens",
-	component: DashboardApiTokens,
+	),
 });
 
-function DashboardProfile() {
-	return (
+const profileRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/profile",
+	component: () => (
 		<DashboardLayout title="Profile">
 			<ProfilePage />
 		</DashboardLayout>
-	);
-}
-
-const profileRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/profile",
-	component: DashboardProfile,
-});
-
-const loginRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/login",
-	component: () => (
-		<Suspense fallback={<PageLoading />}>
-			<LoginPage />
-		</Suspense>
 	),
 });
 
-const signUpRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/sign-up",
-	component: () => (
-		<Suspense fallback={<PageLoading />}>
-			<SignUpPage />
-		</Suspense>
-	),
-});
-
-const forgotPasswordRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/forgot-password",
-	component: () => (
-		<Suspense fallback={<PageLoading />}>
-			<ForgotPasswordPage />
-		</Suspense>
-	),
-});
-
-const resetPasswordRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/reset-password",
-	component: () => (
-		<Suspense fallback={<PageLoading />}>
-			<ResetPasswordPage />
-		</Suspense>
-	),
-	validateSearch: (search: Record<string, unknown>) => ({
-		token: (search.token as string) ?? "",
-	}),
-});
+// ---------------------------------------------------------------------------
+// Router
+// ---------------------------------------------------------------------------
 
 const routeTree = rootRoute.addChildren([
-	indexRoute,
-	loginRoute,
-	signUpRoute,
-	forgotPasswordRoute,
-	resetPasswordRoute,
-	menuRoute,
-	menusRoute,
-	devicesRoute,
-	staffRoute,
-	locationsRoute,
-	taxRatesRoute,
-	apiTokensRoute,
-	profileRoute,
-	setupBusinessRoute,
-	setupStaffRoute,
-	setupTaxRatesRoute,
-	setupMenuRoute,
-	setupSummaryRoute,
+	publicLayout.addChildren([loginRoute, signUpRoute, forgotPasswordRoute, resetPasswordRoute]),
+	authedLayout.addChildren([
+		indexRoute,
+		menuRoute,
+		menusRoute,
+		devicesRoute,
+		staffRoute,
+		locationsRoute,
+		taxRatesRoute,
+		apiTokensRoute,
+		profileRoute,
+		setupBusinessRoute,
+		setupStaffRoute,
+		setupTaxRatesRoute,
+		setupMenuRoute,
+		setupSummaryRoute,
+	]),
 ]);
 
 const router = createRouter({
@@ -378,11 +381,7 @@ if (!rootElement.innerHTML) {
 			<ErrorBoundary
 				fallback={(err, reset) => <ErrorFallback error={err} reset={reset} fullPage />}
 			>
-				<AuthProvider>
-					<WizardProvider>
-						<RouterProvider router={router} />
-					</WizardProvider>
-				</AuthProvider>
+				<RouterProvider router={router} />
 			</ErrorBoundary>
 		),
 		rootElement,

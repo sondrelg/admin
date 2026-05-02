@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
 export default function ResetPasswordPage() {
-	const search = useSearch({ from: "/reset-password" });
+	const search = useSearch({ from: "/public/reset-password" });
 	const token = () => search().token;
 
 	const [newPassword, setNewPassword] = createSignal("");

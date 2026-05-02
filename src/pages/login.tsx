@@ -3,12 +3,10 @@ import { createSignal, Show } from "solid-js";
 import { customFetch } from "~/api/client";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
-import { useAuth } from "~/contexts/auth-context";
 import { authenticatePasskey, isWebAuthnSupported } from "~/lib/webauthn";
 
 export default function LoginPage() {
 	const navigate = useNavigate();
-	const { signIn, refreshMe } = useAuth();
 
 	const [email, setEmail] = createSignal("");
 	const [password, setPassword] = createSignal("");
@@ -58,7 +56,6 @@ export default function LoginPage() {
 			);
 
 			if (finishRes.status === 200) {
-				await refreshMe();
 				navigate({ to: "/" });
 			} else {
 				setError(finishRes.data?.message ?? "Passkey authentication failed.");
@@ -89,11 +86,18 @@ export default function LoginPage() {
 
 		setIsSubmitting(true);
 		try {
-			const err = await signIn(email(), password());
-			if (err) {
-				setError(err);
-			} else {
+			const res = await customFetch<{
+				data: { user?: unknown; error?: string; message?: string };
+				status: number;
+			}>("/api/auth/sign-in", {
+				method: "POST",
+				body: JSON.stringify({ email: email(), password: password() }),
+			});
+
+			if (res.status === 200) {
 				navigate({ to: "/" });
+			} else {
+				setError(res.data?.error ?? res.data?.message ?? "Sign in failed");
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "An unexpected error occurred");
