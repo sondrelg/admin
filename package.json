@@ -70,6 +70,6 @@
     "vitest": "^4.1.5"
   },
   "simple-git-hooks": {
-    "pre-commit": "cd frontend && bun run pre-commit"
+    "pre-commit": "bun run pre-commit"
   }
 }
