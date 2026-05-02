@@ -59,7 +59,7 @@ function toggleDay(bitmask: number | null, dayIndex: number): number {
 
 function formatTime(time: string | null): string {
 	if (!time) return "";
-	return time.substring(0, 5);
+	return time.slice(0, 5);
 }
 
 function describeSchedule(menu: Menu): string {
@@ -386,10 +386,10 @@ function MenuDetailSheet(props: {
 		const body: Record<string, unknown> = {
 			name: name(),
 			is_active: isActive(),
+			active_from: activeFrom() || null,
+			active_until: activeUntil() || null,
+			active_days: activeDays(),
 		};
-		body.active_from = activeFrom() || null;
-		body.active_until = activeUntil() || null;
-		body.active_days = activeDays();
 
 		const res = await customFetch<{
 			data: Menu & { error?: string; message?: string };

@@ -104,7 +104,7 @@ export function StaffPage() {
 							<TextFieldInput placeholder="Ola Nordmann" required />
 						</TextField>
 
-						<TextField value={pin()} onChange={(v) => setPin(v.replace(/\D/g, "").slice(0, 4))}>
+						<TextField value={pin()} onChange={(v) => setPin(v.replaceAll(/\D/g, "").slice(0, 4))}>
 							<TextFieldLabel>4-Digit PIN</TextFieldLabel>
 							<TextFieldInput
 								type="password"
@@ -117,7 +117,7 @@ export function StaffPage() {
 
 						<TextField
 							value={pinConfirm()}
-							onChange={(v) => setPinConfirm(v.replace(/\D/g, "").slice(0, 4))}
+							onChange={(v) => setPinConfirm(v.replaceAll(/\D/g, "").slice(0, 4))}
 						>
 							<TextFieldLabel>Confirm PIN</TextFieldLabel>
 							<TextFieldInput

@@ -111,9 +111,8 @@ const SidebarProvider: Component<SidebarProviderProps> = (rawProps) => {
 	};
 
 	// Helper to toggle the sidebar.
-	const toggleSidebar = () => {
-		return isMobile() ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-	};
+	const toggleSidebar = () =>
+		isMobile() ? setOpenMobile((open) => !open) : setOpen((open) => !open);
 
 	// Adds a keyboard shortcut to toggle the sidebar.
 	onMount(() => {

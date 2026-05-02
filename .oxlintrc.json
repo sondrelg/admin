@@ -1,23 +1,38 @@
 {
-  "plugins": ["typescript", "import", "react", "jsx-a11y", "unicorn"],
+  "plugins": ["typescript", "import", "react", "jsx-a11y", "unicorn", "promise", "vitest"],
   "env": {
     "browser": true,
     "es2021": true
   },
   "categories": {
-    "correctness": "warn",
-    "suspicious": "warn",
-    "pedantic": "off",
-    "perf": "off"
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "warn",
+    "perf": "warn"
   },
   "rules": {
+    // --- Core JS ---
+    "no-console": "warn",
+    "no-shadow": "off",
+    "no-unused-vars": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off",
+
+    // --- Import ---
     "import/no-absolute-path": "off",
     "import/no-unassigned-import": "off",
     "import/no-default-export": "off",
+    "import/no-cycle": "warn",
+    "import/max-dependencies": "off",
+
+    // --- TypeScript ---
     "typescript/no-explicit-any": "warn",
+    "typescript/prefer-as-const": "error",
     "typescript/no-unused-vars": "off",
     "typescript/no-non-null-assertion": "off",
-    "typescript/prefer-as-const": "error",
+    "typescript/explicit-function-return-type": "off",
+
+    // --- React/JSX (used for SolidJS JSX) ---
     "react/jsx-no-comment-textnodes": "error",
     "react/jsx-no-duplicate-props": "error",
     "react/jsx-no-undef": "off",
@@ -25,14 +40,32 @@
     "react/no-children-prop": "error",
     "react/no-danger-with-children": "error",
     "react/void-dom-elements-no-children": "error",
+    "react/jsx-no-constructed-context-values": "off",
+    "react/checked-requires-onchange-or-readonly": "off",
+    "react/no-unescaped-entities": "off",
+
+    // --- JSX Accessibility ---
+    "jsx-a11y/label-has-associated-control": "off",
+
+    // --- Unicorn ---
     "unicorn/prefer-node-protocol": "off",
     "unicorn/no-array-for-each": "warn",
     "unicorn/no-useless-spread": "off",
     "unicorn/no-array-sort": "off",
     "unicorn/no-null": "off",
-    "jsx-a11y/label-has-associated-control": "off",
-    "no-unused-vars": "off",
-    "no-shadow": "off"
+    "unicorn/prefer-query-selector": "off",
+    "unicorn/prefer-dom-node-append": "off",
+    "unicorn/no-negated-condition": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/no-typeof-undefined": "off",
+    "no-warning-comments": "off",
+    "no-inline-comments": "off",
+
+    // --- Promise ---
+    "promise/catch-or-return": "off",
+
+    // --- Vitest ---
+    "vitest/no-focused-tests": "error"
   },
   "overrides": [
     {
@@ -43,9 +76,21 @@
       }
     },
     {
-      "files": ["vite.config.ts", "*.config.ts", "*.config.js"],
+      "files": ["vite.config.ts", "vitest.config.ts", "*.config.ts", "*.config.js"],
       "rules": {
         "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["scripts/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["src/api/client.ts", "src/pages/setup/**"],
+      "rules": {
+        "no-await-in-loop": "off"
       }
     }
   ],
@@ -53,8 +98,6 @@
     "node_modules",
     "dist",
     "build",
-    ".svelte-kit",
-    "vite.config.ts",
     "src/api/generated/**",
     "src/api/models/**"
   ]

@@ -97,7 +97,7 @@ export function formatPrice(minorUnit: number): string {
 }
 
 export function parsePriceToMinor(input: string): number {
-	const cleaned = input.replace(/[^0-9.,-]/g, "").replace(",", ".");
+	const cleaned = input.replaceAll(/[^0-9.,-]/g, "").replace(",", ".");
 	const num = Number.parseFloat(cleaned);
 	if (Number.isNaN(num)) return 0;
 	return Math.round(num * 100);

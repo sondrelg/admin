@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.13/schema.json",
 	"files": {
 		"includes": [
 			"**",
@@ -33,29 +33,57 @@
 	},
 	"linter": {
 		"enabled": true,
+		"domains": {
+			"types": "all"
+		},
 		"rules": {
 			"recommended": true,
+
 			"correctness": {
 				"noSolidDestructuredProps": "error",
-				"noUnusedVariables": "error"
+				"noUnusedVariables": "error",
+				"noUndeclaredDependencies": "warn"
 			},
+
+			"suspicious": {
+				"noDebugger": "error",
+				"noDoubleEquals": "error",
+				"noExplicitAny": "warn",
+				"noImportCycles": "error",
+				"noUnusedExpressions": "warn"
+			},
+
+			"complexity": {
+				"noUselessUndefined": "warn",
+				"noUselessCatchBinding": "warn"
+			},
+
 			"style": {
 				"noNonNullAssertion": "off",
 				"useConst": "error",
 				"useTemplate": "warn",
 				"useExponentiationOperator": "error",
-				"useNodejsImportProtocol": "off"
+				"useNodejsImportProtocol": "off",
+				"useConsistentArrowReturn": "warn"
 			},
-			"suspicious": {
-				"noDebugger": "warn",
-				"noDoubleEquals": "warn",
-				"noExplicitAny": "warn"
+
+			"security": {
+				"noSecrets": "off"
 			},
+
 			"a11y": {
 				"useKeyWithClickEvents": "off"
 			},
+
 			"nursery": {
 				"useSortedClasses": "off"
+			}
+		}
+	},
+	"assist": {
+		"actions": {
+			"source": {
+				"noDuplicateClasses": "on"
 			}
 		}
 	}

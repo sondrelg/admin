@@ -62,5 +62,5 @@ export function getTracer(name = "smls-admin") {
 }
 
 function escapeRegExp(s: string): string {
-	return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return s.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

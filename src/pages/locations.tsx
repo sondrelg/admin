@@ -46,7 +46,7 @@ function formatPrice(minorUnit: number): string {
 }
 
 function parsePriceToMinor(input: string): number {
-	const cleaned = input.replace(/[^0-9.,-]/g, "").replace(",", ".");
+	const cleaned = input.replaceAll(/[^0-9.,-]/g, "").replace(",", ".");
 	const num = Number.parseFloat(cleaned);
 	if (Number.isNaN(num)) return 0;
 	return Math.round(num * 100);
@@ -614,7 +614,7 @@ function CreateLocationDialog(props: {
 					<div class="grid grid-cols-2 gap-4">
 						<TextField
 							value={postalCode()}
-							onChange={(v) => setPostalCode(v.replace(/\D/g, "").slice(0, 4))}
+							onChange={(v) => setPostalCode(v.replaceAll(/\D/g, "").slice(0, 4))}
 						>
 							<TextFieldLabel>Postal Code</TextFieldLabel>
 							<TextFieldInput placeholder="0154" inputMode="numeric" maxLength={4} />
@@ -628,7 +628,7 @@ function CreateLocationDialog(props: {
 
 					<TextField
 						value={orgNumber()}
-						onChange={(v) => setOrgNumber(v.replace(/\D/g, "").slice(0, 9))}
+						onChange={(v) => setOrgNumber(v.replaceAll(/\D/g, "").slice(0, 9))}
 					>
 						<TextFieldLabel>Org. Number (optional)</TextFieldLabel>
 						<TextFieldInput placeholder="123456789" inputMode="numeric" maxLength={9} />

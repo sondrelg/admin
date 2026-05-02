@@ -189,7 +189,7 @@ export function BusinessPage() {
 						<div class="grid grid-cols-2 gap-4">
 							<TextField
 								value={postalCode()}
-								onChange={(v) => setPostalCode(v.replace(/\D/g, "").slice(0, 4))}
+								onChange={(v) => setPostalCode(v.replaceAll(/\D/g, "").slice(0, 4))}
 							>
 								<TextFieldLabel>Postal Code</TextFieldLabel>
 								<TextFieldInput placeholder="0154" inputMode="numeric" maxLength={4} />
@@ -203,7 +203,7 @@ export function BusinessPage() {
 
 						<TextField
 							value={orgNumber()}
-							onChange={(v) => setOrgNumber(v.replace(/\D/g, "").slice(0, 9))}
+							onChange={(v) => setOrgNumber(v.replaceAll(/\D/g, "").slice(0, 9))}
 						>
 							<TextFieldLabel>Org. Number</TextFieldLabel>
 							<TextFieldInput placeholder="123456789" inputMode="numeric" maxLength={9} />

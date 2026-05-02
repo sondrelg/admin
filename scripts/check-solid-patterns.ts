@@ -39,7 +39,7 @@ const DATE_TO_LOCALE_TIME_PATTERN = /\.toLocaleTimeString\s*\(/g;
 const DATE_TO_LOCALE_STRING_PATTERN = /new\s+Date\s*\([^)]*\)\s*\.toLocaleString\s*\(/g;
 const DATE_INTL_FORMAT_PATTERN = /new\s+Intl\.DateTimeFormat\s*\(/g;
 
-async function checkFile(filePath: string): Promise<void> {
+function checkFile(filePath: string): void {
 	if (filePath.endsWith("/src/lib/datetime.ts")) {
 		return;
 	}
@@ -51,7 +51,7 @@ async function checkFile(filePath: string): Promise<void> {
 	let match: RegExpExecArray | null;
 
 	while ((match = PROP_INIT_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		issues.push({
 			file: filePath,
 			line: lineNum,
@@ -67,7 +67,7 @@ async function checkFile(filePath: string): Promise<void> {
 
 	// Check for prop destructuring
 	while ((match = PROP_DESTRUCTURE_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		// Skip false positives in comments
 		const lineContent = lines[lineNum - 1];
 		if (lineContent && !lineContent.trim().startsWith("//")) {
@@ -86,7 +86,7 @@ async function checkFile(filePath: string): Promise<void> {
 
 	// Check for && in JSX
 	while ((match = JSX_AND_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		const lineContent = lines[lineNum - 1];
 		// Only warn if it looks like a conditional render
 		if (lineContent && !lineContent.includes("<Show")) {
@@ -105,7 +105,7 @@ async function checkFile(filePath: string): Promise<void> {
 
 	// Check for direct date formatting (should use src/lib/datetime.ts helpers)
 	while ((match = DATE_TO_LOCALE_DATE_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		issues.push({
 			file: filePath,
 			line: lineNum,
@@ -118,7 +118,7 @@ async function checkFile(filePath: string): Promise<void> {
 	DATE_TO_LOCALE_DATE_PATTERN.lastIndex = 0;
 
 	while ((match = DATE_TO_LOCALE_TIME_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		issues.push({
 			file: filePath,
 			line: lineNum,
@@ -131,7 +131,7 @@ async function checkFile(filePath: string): Promise<void> {
 	DATE_TO_LOCALE_TIME_PATTERN.lastIndex = 0;
 
 	while ((match = DATE_TO_LOCALE_STRING_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		issues.push({
 			file: filePath,
 			line: lineNum,
@@ -144,7 +144,7 @@ async function checkFile(filePath: string): Promise<void> {
 	DATE_TO_LOCALE_STRING_PATTERN.lastIndex = 0;
 
 	while ((match = DATE_INTL_FORMAT_PATTERN.exec(content)) !== null) {
-		const lineNum = content.substring(0, match.index).split("\n").length;
+		const lineNum = content.slice(0, match.index).split("\n").length;
 		issues.push({
 			file: filePath,
 			line: lineNum,
@@ -180,7 +180,7 @@ async function main() {
 	console.log(`Found ${files.length} files to check\n`);
 
 	for (const file of files) {
-		await checkFile(file);
+		checkFile(file);
 	}
 
 	if (issues.length === 0) {

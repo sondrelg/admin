@@ -61,16 +61,17 @@ function calculateRetryDelay(attempt: number, retryAfterMs?: number): number {
 }
 
 function parseRetryAfter(retryAfter: string | null | undefined): number | undefined {
-	if (!retryAfter) return undefined;
+	if (!retryAfter) return;
 	const seconds = Number.parseInt(retryAfter, 10);
 	if (!Number.isNaN(seconds)) return seconds * 1000;
 	const date = new Date(retryAfter);
 	if (!Number.isNaN(date.getTime())) return Math.max(0, date.getTime() - Date.now());
-	return undefined;
 }
 
-async function sleep(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }
 
 export async function customFetch<T>(url: string, options?: RequestInit): Promise<T> {
