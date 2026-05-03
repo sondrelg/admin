@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/solid-router";
-import { createSignal, Show } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { signUp } from "~/api/generated/sdk.gen";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
@@ -10,38 +10,37 @@ export default function SignUpPage() {
 	const [name, setName] = createSignal("");
 	const [email, setEmail] = createSignal("");
 	const [password, setPassword] = createSignal("");
-	const [passwordConfirm, setPasswordConfirm] = createSignal("");
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
 
-	const validate = (): string | null => {
-		if (!name().trim()) return "Name is required.";
-		if (!email().trim() || !email().includes("@")) return "A valid email is required.";
-		if (password().length < 8) return "Password must be at least 8 characters.";
-		if (password() !== passwordConfirm()) return "Passwords do not match.";
-		return null;
-	};
+	const canSubmit = createMemo(() => !!name().trim() && !!email().trim() && !!password());
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 		setError(null);
 
-		const validationError = validate();
-		if (validationError) {
-			setError(validationError);
+		if (!canSubmit()) {
+			setError("Please fill in name, email, and password.");
 			return;
 		}
 
 		setIsSubmitting(true);
 		try {
-			const { data } = await signUp({
-				body: { email: email(), password: password(), name: name() },
+			const { data, response } = await signUp({
+				body: { email: email().trim(), password: password(), name: name().trim() },
 			});
 
 			if (data) {
 				navigate({ to: "/setup/business" });
+				return;
+			}
+
+			if (response?.status === 409) {
+				setError("An account with this email already exists.");
+			} else if (response?.status === 400) {
+				setError("Please check your details and try again.");
 			} else {
-				setError("Sign up failed");
+				setError("Sign up failed. Please try again.");
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "An unexpected error occurred");
@@ -71,7 +70,7 @@ export default function SignUpPage() {
 						</svg>
 					</div>
 					<h1 class="text-2xl font-bold">Create your account</h1>
-					<p class="text-muted-foreground">Get started with your POS system</p>
+					<p class="text-muted-foreground">Create your account to start setup</p>
 				</div>
 
 				<div class="rounded-lg border bg-card p-6 shadow-sm">
@@ -95,30 +94,20 @@ export default function SignUpPage() {
 							<TextFieldLabel>Password</TextFieldLabel>
 							<TextFieldInput
 								type="password"
-								placeholder="At least 8 characters"
+								placeholder="Create a password"
 								required
 								autocomplete="new-password"
 							/>
-						</TextField>
-
-						<TextField value={passwordConfirm()} onChange={setPasswordConfirm}>
-							<TextFieldLabel>Confirm Password</TextFieldLabel>
-							<TextFieldInput
-								type="password"
-								placeholder="Repeat password"
-								required
-								autocomplete="new-password"
-							/>
-							<Show when={passwordConfirm() && password() !== passwordConfirm()}>
-								<p class="mt-1 text-xs text-destructive">Passwords do not match</p>
-							</Show>
+							<p class="mt-1 text-xs text-muted-foreground">
+								We'll validate password rules after submit.
+							</p>
 						</TextField>
 
 						<Show when={error()}>
 							<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error()}</div>
 						</Show>
 
-						<Button type="submit" class="w-full" disabled={isSubmitting()}>
+						<Button type="submit" class="w-full" disabled={isSubmitting() || !canSubmit()}>
 							{isSubmitting() ? "Creating account..." : "Sign Up"}
 						</Button>
 					</form>

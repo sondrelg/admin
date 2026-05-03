@@ -125,9 +125,10 @@ export type UpdateMenu = {
     name?: string | null;
 };
 
-export type UpdateLocation = {
+export type UpdateLocationRequest = {
     address?: string | null;
     city?: string | null;
+    coordinates?: null | CoordinateRequest;
     country?: string | null;
     is_active?: boolean | null;
     name?: string | null;
@@ -135,6 +136,11 @@ export type UpdateLocation = {
     postal_code?: string | null;
     settlement_time?: string | null;
     timezone?: string | null;
+};
+
+export type CoordinateRequest = {
+    latitude: number;
+    longitude: number;
 };
 
 export type UpdateDevice = {
@@ -411,6 +417,7 @@ export type MeResponse = {
 export type LocationResponse = {
     address: string;
     city: string;
+    coordinates?: null | Coordinate;
     country: string;
     created_at: string;
     id: string;
@@ -421,6 +428,11 @@ export type LocationResponse = {
     settlement_time: string;
     tenant_id: string;
     timezone: string;
+};
+
+export type Coordinate = {
+    latitude: number;
+    longitude: number;
 };
 
 export type LocationMenuOverrideResponse = {
@@ -540,9 +552,10 @@ export type CreateMenu = {
     name: string;
 };
 
-export type CreateLocation = {
+export type CreateLocationRequest = {
     address: string;
     city: string;
+    coordinates?: null | CoordinateRequest;
     country?: string;
     name: string;
     org_number?: string | null;
@@ -661,6 +674,24 @@ export type AllergenResponse = {
     name: string;
 };
 
+export type AddressSuggestionResponse = {
+    address_name?: string | null;
+    address_text: string;
+    house_letter?: string | null;
+    house_number?: number | null;
+    lat?: number | null;
+    lon?: number | null;
+    municipality_name?: string | null;
+    municipality_number?: string | null;
+    postal_code?: string | null;
+    postal_place?: string | null;
+};
+
+export type AddressSearchResponse = {
+    addresses: Array<AddressSuggestionResponse>;
+    total_hits?: number | null;
+};
+
 /**
  * Returned to the admin when they generate an activation code.
  */
@@ -669,6 +700,35 @@ export type ActivationCodeResponse = {
     device_id: string;
     expires_at: string;
 };
+
+export type SearchAddressesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Free text query, e.g. 'Storgata 1, Oslo'
+         */
+        q: string;
+        /**
+         * Max number of results
+         */
+        limit?: number;
+        /**
+         * Optional municipality filter, e.g. 0301
+         */
+        municipality_number?: string;
+    };
+    url: '/api/addresses/search';
+};
+
+export type SearchAddressesResponses = {
+    /**
+     * Address suggestions
+     */
+    200: AddressSearchResponse;
+};
+
+export type SearchAddressesResponse = SearchAddressesResponses[keyof SearchAddressesResponses];
 
 export type ListAllergensData = {
     body?: never;
@@ -1406,7 +1466,7 @@ export type ListLocationsResponses = {
 export type ListLocationsResponse = ListLocationsResponses[keyof ListLocationsResponses];
 
 export type CreateLocationData = {
-    body: CreateLocation;
+    body: CreateLocationRequest;
     path?: never;
     query?: never;
     url: '/api/locations';
@@ -1450,7 +1510,7 @@ export type GetLocationResponses = {
 export type GetLocationResponse = GetLocationResponses[keyof GetLocationResponses];
 
 export type UpdateLocationData = {
-    body: UpdateLocation;
+    body: UpdateLocationRequest;
     path: {
         /**
          * Location ID

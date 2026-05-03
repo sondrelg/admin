@@ -1,6 +1,8 @@
 import { useNavigate } from "@tanstack/solid-router";
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { setTenantId } from "~/api/client";
+import { searchAddresses } from "~/api/generated/sdk.gen";
+import type { AddressSuggestionResponse } from "~/api/generated/types.gen";
 import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
@@ -20,12 +22,18 @@ export default function BusinessPage() {
 	const [city, setCity] = createSignal("");
 	const [postalCode, setPostalCode] = createSignal("");
 	const [orgNumber, setOrgNumber] = createSignal("");
+	const [coordinates, setCoordinates] = createSignal<{
+		latitude: number;
+		longitude: number;
+	} | null>(null);
+	const [addressSuggestions, setAddressSuggestions] = createSignal<AddressSuggestionResponse[]>([]);
+	const [isSearchingAddress, setIsSearchingAddress] = createSignal(false);
 
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
+	let orgNumberInputRef: HTMLInputElement | undefined;
 
 	const SLUG_RE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
-	const POSTAL_RE = /^\d{4}$/;
 
 	const slugValid = () => {
 		const s = slug();
@@ -46,17 +54,72 @@ export default function BusinessPage() {
 		}
 	});
 
+	createEffect(() => {
+		const query = address().trim();
+		if (query.length < 3) {
+			setAddressSuggestions([]);
+			setIsSearchingAddress(false);
+			return;
+		}
+
+		setIsSearchingAddress(true);
+		const timeoutId = setTimeout(async () => {
+			try {
+				const { data } = await searchAddresses({ query: { q: query, limit: 5 } });
+				setAddressSuggestions(data?.addresses ?? []);
+			} catch {
+				setAddressSuggestions([]);
+			} finally {
+				setIsSearchingAddress(false);
+			}
+		}, 250);
+
+		return () => {
+			clearTimeout(timeoutId);
+		};
+	});
+
+	const canContinue = createMemo(
+		() =>
+			!!businessName().trim() &&
+			!!locationName().trim() &&
+			!!address().trim() &&
+			/^\d{4}$/.test(postalCode()) &&
+			city().trim().length >= 2 &&
+			slugValid(),
+	);
+
 	const validate = (): string | null => {
-		if (!businessName().trim()) return "Business name is required.";
-		if (!slugValid())
-			return "Slug must be lowercase letters, digits, and hyphens (at least 2 characters, cannot start or end with a hyphen).";
-		if (!locationName().trim()) return "Location name is required.";
-		if (!address() || address().length < 2) return "Address is required (at least 2 characters).";
-		if (!postalCode() || !POSTAL_RE.test(postalCode()))
+		if (!businessName().trim() || !locationName().trim() || !address().trim() || !slugValid()) {
+			return "Please fill in required fields to continue.";
+		}
+		if (!/^\d{4}$/.test(postalCode())) {
 			return "Postal code must be exactly 4 digits.";
-		if (!city() || city().length < 2) return "City is required (at least 2 characters).";
-		if (!orgNumber() || orgNumber().length !== 9) return "Org. number must be exactly 9 digits.";
+		}
+		if (city().trim().length < 2) {
+			return "City must be at least 2 characters.";
+		}
 		return null;
+	};
+
+	const applyAddressSuggestion = (suggestion: AddressSuggestionResponse) => {
+		setAddress(suggestion.address_text);
+		if (typeof suggestion.lat === "number" && typeof suggestion.lon === "number") {
+			setCoordinates({ latitude: suggestion.lat, longitude: suggestion.lon });
+		} else {
+			setCoordinates(null);
+		}
+		if (suggestion.postal_code) {
+			setPostalCode(suggestion.postal_code.replaceAll(/\D/g, "").slice(0, 4));
+		}
+		if (suggestion.postal_place) {
+			setCity(suggestion.postal_place);
+		}
+		setAddressSuggestions([]);
+
+		queueMicrotask(() => {
+			orgNumberInputRef?.focus();
+		});
 	};
 
 	const handleSubmit = async (e: Event) => {
@@ -124,6 +187,7 @@ export default function BusinessPage() {
 						city: city(),
 						postal_code: postalCode(),
 						org_number: orgNumber() || undefined,
+						coordinates: coordinates(),
 					}),
 				});
 
@@ -147,7 +211,7 @@ export default function BusinessPage() {
 		<WizardLayout
 			step={1}
 			title="Your Business"
-			description="Tell us about your business. We'll set up your account and first location."
+			description="Tell us about your business. Keep it simple — you can refine details later."
 		>
 			<form onSubmit={handleSubmit} class="space-y-6">
 				<div class="rounded-xl border bg-card p-6 shadow-sm">
@@ -166,7 +230,7 @@ export default function BusinessPage() {
 							}}
 						>
 							<TextFieldLabel>URL Slug</TextFieldLabel>
-							<TextFieldInput placeholder="oslo-kaffebrenneri" />
+							<TextFieldInput placeholder="oslo-kaffebrenneri" tabIndex={-1} />
 							<p class="mt-1 text-xs text-muted-foreground">
 								Your unique identifier: <span class="font-mono">{slug() || "..."}</span>
 							</p>
@@ -182,12 +246,47 @@ export default function BusinessPage() {
 							<TextFieldInput placeholder="Hovedkontor" />
 						</TextField>
 
-						<TextField value={address()} onChange={(v) => setAddress(v)}>
-							<TextFieldLabel>Address</TextFieldLabel>
-							<TextFieldInput placeholder="Karl Johans gate 1" />
-						</TextField>
+						<div class="relative">
+							<TextField
+								value={address()}
+								onChange={(v) => {
+									setAddress(v);
+									setCoordinates(null);
+								}}
+							>
+								<TextFieldLabel>Address</TextFieldLabel>
+								<TextFieldInput
+									placeholder="Karl Johans gate 1"
+									autocomplete="street-address"
+									data-1p-ignore="true"
+									data-lpignore="true"
+								/>
+								<Show when={isSearchingAddress()}>
+									<p class="mt-1 text-xs text-muted-foreground">Searching addresses…</p>
+								</Show>
+							</TextField>
 
-						<div class="grid grid-cols-2 gap-4">
+							<Show when={addressSuggestions().length > 0}>
+								<div class="absolute inset-x-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-md border bg-background shadow-md">
+									<For each={addressSuggestions()}>
+										{(suggestion) => (
+											<button
+												type="button"
+												class="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-accent"
+												onClick={() => applyAddressSuggestion(suggestion)}
+											>
+												<span>{suggestion.address_text}</span>
+												<span class="text-xs text-muted-foreground">
+													{suggestion.postal_code ?? ""} {suggestion.postal_place ?? ""}
+												</span>
+											</button>
+										)}
+									</For>
+								</div>
+							</Show>
+						</div>
+
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<TextField
 								value={postalCode()}
 								onChange={(v) => setPostalCode(v.replaceAll(/\D/g, "").slice(0, 4))}
@@ -206,8 +305,15 @@ export default function BusinessPage() {
 							value={orgNumber()}
 							onChange={(v) => setOrgNumber(v.replaceAll(/\D/g, "").slice(0, 9))}
 						>
-							<TextFieldLabel>Org. Number</TextFieldLabel>
-							<TextFieldInput placeholder="123456789" inputMode="numeric" maxLength={9} />
+							<TextFieldLabel>Org. Number (optional)</TextFieldLabel>
+							<TextFieldInput
+								ref={(el) => {
+									orgNumberInputRef = el;
+								}}
+								placeholder="123456789"
+								inputMode="numeric"
+								maxLength={9}
+							/>
 						</TextField>
 					</div>
 				</div>
@@ -217,7 +323,7 @@ export default function BusinessPage() {
 				</Show>
 
 				<div class="flex justify-end">
-					<Button type="submit" disabled={isSubmitting()}>
+					<Button type="submit" disabled={isSubmitting() || !canContinue()}>
 						{isSubmitting() ? "Creating..." : "Next"}
 					</Button>
 				</div>
