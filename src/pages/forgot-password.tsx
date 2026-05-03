@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { forgotPassword } from "~/api/generated/sdk.gen";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
@@ -21,20 +21,14 @@ export default function ForgotPasswordPage() {
 
 		setIsSubmitting(true);
 
-		const res = await customFetch<{ data?: { message?: string }; status: number }>(
-			"/api/auth/forgot-password",
-			{
-				method: "POST",
-				body: JSON.stringify({ email: email() }),
-			},
-		);
+		const { data } = await forgotPassword({ body: { email: email() } });
 
 		setIsSubmitting(false);
 
-		if (res.status === 200) {
+		if (data !== undefined) {
 			setSent(true);
 		} else {
-			setError(res.data?.message ?? "Something went wrong. Please try again.");
+			setError("Something went wrong. Please try again.");
 		}
 	};
 

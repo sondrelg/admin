@@ -1,5 +1,5 @@
 import { createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { useAuth } from "~/contexts/auth-context";
@@ -34,7 +34,7 @@ export default function ProfilePage() {
 	const [deletingId, setDeletingId] = createSignal<string | null>(null);
 
 	const fetchPasskeys = async () => {
-		const res = await customFetch<{ data: PasskeySummary[]; status: number }>("/api/auth/passkeys");
+		const res = await apiFetch<{ data: PasskeySummary[]; status: number }>("/api/auth/passkeys");
 		if (res.status === 200) setPasskeys(res.data);
 		setLoadingPasskeys(false);
 	};
@@ -50,7 +50,7 @@ export default function ProfilePage() {
 		setRegistering(true);
 
 		try {
-			const startRes = await customFetch<{
+			const startRes = await apiFetch<{
 				data: Record<string, unknown>;
 				status: number;
 			}>("/api/auth/passkeys/register/start", {
@@ -66,7 +66,7 @@ export default function ProfilePage() {
 
 			const credential = await createPasskey(startRes.data);
 
-			const finishRes = await customFetch<{
+			const finishRes = await apiFetch<{
 				data: PasskeySummary & { message?: string };
 				status: number;
 			}>("/api/auth/passkeys/register/finish", {
@@ -95,7 +95,7 @@ export default function ProfilePage() {
 		const name = renameValue().trim();
 		if (!name) return;
 
-		const res = await customFetch<{ status: number }>(`/api/auth/passkeys/${id}`, {
+		const res = await apiFetch<{ status: number }>(`/api/auth/passkeys/${id}`, {
 			method: "PUT",
 			body: JSON.stringify({ name }),
 		});
@@ -108,7 +108,7 @@ export default function ProfilePage() {
 
 	const handleDeletePasskey = async (id: string) => {
 		setDeletingId(id);
-		const res = await customFetch<{ status: number }>(`/api/auth/passkeys/${id}`, {
+		const res = await apiFetch<{ status: number }>(`/api/auth/passkeys/${id}`, {
 			method: "DELETE",
 		});
 		setDeletingId(null);
@@ -144,7 +144,7 @@ export default function ProfilePage() {
 
 		setChangingPassword(true);
 
-		const res = await customFetch<{ data?: { message?: string }; status: number }>(
+		const res = await apiFetch<{ data?: { message?: string }; status: number }>(
 			"/api/auth/change-password",
 			{
 				method: "POST",
@@ -180,7 +180,7 @@ export default function ProfilePage() {
 		setDeleteError(null);
 		setDeleting(true);
 
-		const res = await customFetch<{ data?: { message?: string }; status: number }>("/api/auth/me", {
+		const res = await apiFetch<{ data?: { message?: string }; status: number }>("/api/auth/me", {
 			method: "DELETE",
 			body: JSON.stringify({ password: password() }),
 		});

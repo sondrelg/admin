@@ -1,5 +1,5 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import type { BundleSlot, BundleSlotOption, MenuItem } from "./types";
 import { formatPrice } from "./types";
@@ -18,7 +18,7 @@ export function BundleSlotManager(props: { itemId: string; allItems: MenuItem[] 
 	const [deletingId, setDeletingId] = createSignal<string | null>(null);
 
 	const fetchSlots = async () => {
-		const res = await customFetch<{ data: BundleSlot[]; status: number }>(
+		const res = await apiFetch<{ data: BundleSlot[]; status: number }>(
 			`/api/menu-items/${props.itemId}/bundle-slots`,
 		);
 		if (res.status === 200) setSlots(res.data);
@@ -33,7 +33,7 @@ export function BundleSlotManager(props: { itemId: string; allItems: MenuItem[] 
 		if (!newName().trim()) return;
 		setCreating(true);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: BundleSlot & { error?: string; message?: string };
 			status: number;
 		}>(`/api/menu-items/${props.itemId}/bundle-slots`, {
@@ -59,7 +59,7 @@ export function BundleSlotManager(props: { itemId: string; allItems: MenuItem[] 
 		if (!editName().trim()) return;
 		setSavingId(slotId);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: BundleSlot & { error?: string; message?: string };
 			status: number;
 		}>(`/api/menu-items/${props.itemId}/bundle-slots/${slotId}`, {
@@ -81,7 +81,7 @@ export function BundleSlotManager(props: { itemId: string; allItems: MenuItem[] 
 	const handleDelete = async (slotId: string) => {
 		setDeletingId(slotId);
 
-		const res = await customFetch<{ status: number }>(
+		const res = await apiFetch<{ status: number }>(
 			`/api/menu-items/${props.itemId}/bundle-slots/${slotId}`,
 			{ method: "DELETE" },
 		);
@@ -247,7 +247,7 @@ function BundleSlotOptions(props: { itemId: string; slotId: string; allItems: Me
 	const [search, setSearch] = createSignal("");
 
 	const fetchOptions = async () => {
-		const res = await customFetch<{ data: BundleSlotOption[]; status: number }>(
+		const res = await apiFetch<{ data: BundleSlotOption[]; status: number }>(
 			`/api/menu-items/${props.itemId}/bundle-slots/${props.slotId}/options`,
 		);
 		if (res.status === 200) setOptions(res.data);
@@ -275,7 +275,7 @@ function BundleSlotOptions(props: { itemId: string; slotId: string; allItems: Me
 			display_order: i,
 		}));
 
-		const res = await customFetch<{ status: number }>(
+		const res = await apiFetch<{ status: number }>(
 			`/api/menu-items/${props.itemId}/bundle-slots/${props.slotId}/options`,
 			{
 				method: "PUT",

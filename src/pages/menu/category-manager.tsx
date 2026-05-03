@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import type { Category } from "./types";
 
@@ -53,7 +53,7 @@ export function CategoryManager(props: {
 		setCreating(true);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Category & { error?: string; message?: string };
 			status: number;
 		}>("/api/categories", {
@@ -75,7 +75,7 @@ export function CategoryManager(props: {
 		setSavingId(id);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Category & { error?: string; message?: string };
 			status: number;
 		}>(`/api/categories/${id}`, {
@@ -100,7 +100,7 @@ export function CategoryManager(props: {
 		setDeletingId(id);
 		setError(null);
 
-		const res = await customFetch<{ status: number }>(`/api/categories/${id}`, {
+		const res = await apiFetch<{ status: number }>(`/api/categories/${id}`, {
 			method: "DELETE",
 		});
 

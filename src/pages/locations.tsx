@@ -1,5 +1,5 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -62,11 +62,11 @@ export default function LocationsPage() {
 
 	const fetchLocations = async () => {
 		const [locRes, itemsRes] = await Promise.all([
-			customFetch<{
+			apiFetch<{
 				data: Location[] & { error?: string; message?: string };
 				status: number;
 			}>("/api/locations"),
-			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
+			apiFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
 		]);
 		if (locRes.status === 200) {
 			setLocations(locRes.data);
@@ -199,7 +199,7 @@ function LocationOverrides(props: { locationId: string; menuItems: MenuItem[] })
 	const [error, setError] = createSignal<string | null>(null);
 
 	const fetchData = async () => {
-		const overridesRes = await customFetch<{
+		const overridesRes = await apiFetch<{
 			data: LocationMenuOverride[];
 			status: number;
 		}>(`/api/locations/${props.locationId}/menu-overrides`);
@@ -246,7 +246,7 @@ function LocationOverrides(props: { locationId: string; menuItems: MenuItem[] })
 		};
 		if (priceMinorUnit !== null) body.price_minor_unit = priceMinorUnit;
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: LocationMenuOverride & { error?: string; message?: string };
 			status: number;
 		}>(`/api/locations/${props.locationId}/menu-overrides`, {
@@ -270,7 +270,7 @@ function LocationOverrides(props: { locationId: string; menuItems: MenuItem[] })
 		setSavingItemId(menuItemId);
 		setError(null);
 
-		const res = await customFetch<{ status: number }>(
+		const res = await apiFetch<{ status: number }>(
 			`/api/locations/${props.locationId}/menu-overrides/${menuItemId}`,
 			{ method: "DELETE" },
 		);
@@ -563,7 +563,7 @@ function CreateLocationDialog(props: {
 
 		setSubmitting(true);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Location & { error?: string; message?: string };
 			status: number;
 		}>("/api/locations", {

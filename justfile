@@ -68,6 +68,14 @@ _deploy:
       aws s3 sync "{{BUILD_DIR}}/" "s3://${R2_BUCKET}/" \
       --endpoint-url "$endpoint" --delete --exclude "releases/*"
 
+    # Fix content type for extensionless files that S3 sync can't auto-detect
+    for prefix in "releases/$release_id/" ""; do
+      AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+        aws s3 cp "s3://${R2_BUCKET}/${prefix}.well-known/webauthn" \
+                  "s3://${R2_BUCKET}/${prefix}.well-known/webauthn" \
+          --endpoint-url "$endpoint" --content-type "application/json" --metadata-directive REPLACE
+    done
+
     printf '%s\n' "$release_id" > .last_release
 
     #    echo "Purging CDN HTML cache"
@@ -103,6 +111,12 @@ rollback release_id:
     AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
       aws s3 sync "s3://${R2_BUCKET}/releases/{{release_id}}/" "s3://${R2_BUCKET}/" \
       --endpoint-url "$endpoint" --delete --exclude "releases/*"
+
+    # Fix content type for extensionless files
+    AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
+      aws s3 cp "s3://${R2_BUCKET}/.well-known/webauthn" \
+                "s3://${R2_BUCKET}/.well-known/webauthn" \
+        --endpoint-url "$endpoint" --content-type "application/json" --metadata-directive REPLACE
 
     echo "Purging CDN HTML cache"
     curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \

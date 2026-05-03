@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/solid-router";
 import { createSignal, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
@@ -92,7 +92,7 @@ export default function TaxRatesPage() {
 
 			const created = [];
 			for (const row of rows) {
-				const res = await customFetch<{
+				const res = await apiFetch<{
 					data: {
 						id: string;
 						name: string;

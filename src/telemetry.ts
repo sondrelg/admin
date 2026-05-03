@@ -15,6 +15,7 @@ import { resolveApiUrl } from "~/api/client";
 let initialized = false;
 
 const TELEMETRY_PATH = "/api/telemetry/traces";
+const TELEMETRY_PATH_REGEX = /\/api\/telemetry\/traces$/;
 
 export function initTelemetry() {
 	if (initialized) return;
@@ -42,7 +43,7 @@ export function initTelemetry() {
 		tracerProvider: provider,
 		instrumentations: [
 			new FetchInstrumentation({
-				ignoreUrls: [resolveApiUrl(TELEMETRY_PATH)],
+				ignoreUrls: [resolveApiUrl(TELEMETRY_PATH), TELEMETRY_PATH, TELEMETRY_PATH_REGEX],
 			}),
 		],
 	});

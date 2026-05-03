@@ -1,5 +1,5 @@
 import { createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 
 interface StaffMember {
 	id: string;
@@ -22,7 +22,7 @@ export default function StaffPage() {
 	const [error, setError] = createSignal<string | null>(null);
 
 	onMount(async () => {
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: StaffMember[] & { error?: string; message?: string };
 			status: number;
 		}>("/api/staff");

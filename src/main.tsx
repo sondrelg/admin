@@ -10,6 +10,7 @@ import {
 import { render } from "solid-js/web";
 import "solid-devtools";
 import { createEffect, ErrorBoundary, lazy, Show, Suspense } from "solid-js";
+import { setupApiClient } from "~/api/setup-client";
 import { DashboardLayout } from "~/components/dashboard-layout";
 import { PasskeyPrompt } from "~/components/passkey-prompt";
 import { ErrorFallback } from "~/components/ui/error-fallback";
@@ -36,8 +37,6 @@ const SetupStaffPage = lazy(() => import("~/pages/setup/staff"));
 const SetupTaxRatesPage = lazy(() => import("~/pages/setup/tax-rates"));
 const SetupMenuPage = lazy(() => import("~/pages/setup/menu"));
 const SetupSummaryPage = lazy(() => import("~/pages/setup/summary"));
-
-initTelemetry();
 
 function PageLoading() {
 	return (
@@ -114,6 +113,9 @@ const resetPasswordRoute = createRoute({
 // ---------------------------------------------------------------------------
 
 function AuthedLayout() {
+	setupApiClient();
+	initTelemetry();
+
 	return (
 		<AuthProvider>
 			<WizardProvider>
@@ -126,12 +128,14 @@ function AuthedLayout() {
 function AuthGuard() {
 	const { user, loading, checkAuth } = useAuth();
 	const navigate = useNavigate();
+	let redirectedToLogin = false;
 
 	checkAuth();
 
 	createEffect(() => {
-		if (!loading() && !user()) {
-			navigate({ to: "/login" });
+		if (!loading() && !user() && !redirectedToLogin) {
+			redirectedToLogin = true;
+			navigate({ to: "/login", replace: true });
 		}
 	});
 

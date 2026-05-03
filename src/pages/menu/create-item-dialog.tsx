@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -60,7 +60,7 @@ export function CreateItemDialog(props: {
 		if (sku().trim()) body.sku = sku();
 		if (categoryId()) body.category_id = categoryId();
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: MenuItem & { error?: string; message?: string };
 			status: number;
 		}>("/api/menu-items", {

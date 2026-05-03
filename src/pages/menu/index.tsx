@@ -6,7 +6,7 @@ import {
 	SortableProvider,
 } from "@thisbeyond/solid-dnd";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -54,11 +54,11 @@ export default function MenuPage() {
 
 	const fetchData = async () => {
 		const [itemsRes, catsRes, modGroupsRes, allergensRes, taxRatesRes] = await Promise.all([
-			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
-			customFetch<{ data: Category[]; status: number }>("/api/categories"),
-			customFetch<{ data: ModifierGroup[]; status: number }>("/api/modifier-groups"),
-			customFetch<{ data: Allergen[]; status: number }>("/api/allergens"),
-			customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates"),
+			apiFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
+			apiFetch<{ data: Category[]; status: number }>("/api/categories"),
+			apiFetch<{ data: ModifierGroup[]; status: number }>("/api/modifier-groups"),
+			apiFetch<{ data: Allergen[]; status: number }>("/api/allergens"),
+			apiFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates"),
 		]);
 		if (itemsRes.status === 200) setItems(itemsRes.data);
 		if (catsRes.status === 200) setCategories(catsRes.data);
@@ -132,7 +132,7 @@ export default function MenuPage() {
 		setBulkActionRunning(true);
 		const results = await Promise.all(
 			ids.map((id) =>
-				customFetch<{ data: MenuItem; status: number }>(`/api/menu-items/${id}`, {
+				apiFetch<{ data: MenuItem; status: number }>(`/api/menu-items/${id}`, {
 					method: "PUT",
 					body: JSON.stringify({ is_enabled: enabled }),
 				}),
@@ -154,7 +154,7 @@ export default function MenuPage() {
 		setBulkActionRunning(true);
 		const results = await Promise.all(
 			ids.map((id) =>
-				customFetch<{ data: MenuItem; status: number }>(`/api/menu-items/${id}`, {
+				apiFetch<{ data: MenuItem; status: number }>(`/api/menu-items/${id}`, {
 					method: "PUT",
 					body: JSON.stringify({ category_id: categoryId }),
 				}),
@@ -174,7 +174,7 @@ export default function MenuPage() {
 		const ids = [...selectedIds()];
 		if (ids.length === 0) return;
 		setBulkActionRunning(true);
-		await Promise.all(ids.map((id) => customFetch(`/api/menu-items/${id}`, { method: "DELETE" })));
+		await Promise.all(ids.map((id) => apiFetch(`/api/menu-items/${id}`, { method: "DELETE" })));
 		setItems((prev) => prev.filter((i) => !ids.includes(i.id)));
 		setBulkActionRunning(false);
 		setBulkDeleteConfirmOpen(false);
@@ -184,7 +184,7 @@ export default function MenuPage() {
 	const toggleEnabled = async (e: MouseEvent, item: MenuItem) => {
 		e.stopPropagation();
 		setTogglingId(item.id);
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: MenuItem & { error?: string; message?: string };
 			status: number;
 		}>(`/api/menu-items/${item.id}`, {
@@ -250,7 +250,7 @@ export default function MenuPage() {
 		// Persist — fire only changed PUTs in parallel
 		await Promise.all(
 			changed.map((item) =>
-				customFetch(`/api/menu-items/${item.id}`, {
+				apiFetch(`/api/menu-items/${item.id}`, {
 					method: "PUT",
 					body: JSON.stringify({ display_order: item.display_order }),
 				}),

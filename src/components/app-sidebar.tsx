@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/solid-router";
+import { Link, useNavigate } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
 import {
 	Sidebar,
@@ -211,12 +211,17 @@ function POSIcon() {
 
 export function AppSidebar() {
 	const { user, signOut } = useAuth();
+	const navigate = useNavigate();
 	const [isLoggingOut, setIsLoggingOut] = createSignal(false);
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
-		await signOut();
-		window.location.href = "/login";
+		try {
+			await signOut();
+			await navigate({ to: "/login", replace: true });
+		} finally {
+			setIsLoggingOut(false);
+		}
 	};
 
 	return (

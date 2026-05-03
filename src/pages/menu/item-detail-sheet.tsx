@@ -1,5 +1,5 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import {
 	Sheet,
@@ -71,8 +71,8 @@ export function ItemDetailSheet(props: {
 
 	const fetchItemDetails = async (itemId: string) => {
 		const [itemAllergensRes, itemModGroupsRes] = await Promise.all([
-			customFetch<{ data: Allergen[]; status: number }>(`/api/menu-items/${itemId}/allergens`),
-			customFetch<{ data: ModifierGroupAssignment[]; status: number }>(
+			apiFetch<{ data: Allergen[]; status: number }>(`/api/menu-items/${itemId}/allergens`),
+			apiFetch<{ data: ModifierGroupAssignment[]; status: number }>(
 				`/api/menu-items/${itemId}/modifier-groups`,
 			),
 		]);
@@ -111,7 +111,7 @@ export function ItemDetailSheet(props: {
 		else body.sku = null;
 		body.category_id = categoryId() || null;
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: MenuItem & { error?: string; message?: string };
 			status: number;
 		}>(`/api/menu-items/${item.id}`, {
@@ -133,7 +133,7 @@ export function ItemDetailSheet(props: {
 		if (!item) return;
 
 		setDeleting(true);
-		const res = await customFetch<{ status: number }>(`/api/menu-items/${item.id}`, {
+		const res = await apiFetch<{ status: number }>(`/api/menu-items/${item.id}`, {
 			method: "DELETE",
 		});
 		setDeleting(false);
@@ -154,7 +154,7 @@ export function ItemDetailSheet(props: {
 		else current.add(allergenId);
 
 		setSavingAllergens(true);
-		const res = await customFetch<{ status: number }>(`/api/menu-items/${item.id}/allergens`, {
+		const res = await apiFetch<{ status: number }>(`/api/menu-items/${item.id}/allergens`, {
 			method: "PUT",
 			body: JSON.stringify({ allergen_ids: [...current] }),
 		});
@@ -178,13 +178,10 @@ export function ItemDetailSheet(props: {
 			modifier_group_id: id,
 			display_order: i,
 		}));
-		const res = await customFetch<{ status: number }>(
-			`/api/menu-items/${item.id}/modifier-groups`,
-			{
-				method: "PUT",
-				body: JSON.stringify({ groups }),
-			},
-		);
+		const res = await apiFetch<{ status: number }>(`/api/menu-items/${item.id}/modifier-groups`, {
+			method: "PUT",
+			body: JSON.stringify({ groups }),
+		});
 		setSavingModGroups(false);
 
 		if (res.status === 200 || res.status === 204) {
@@ -198,7 +195,7 @@ export function ItemDetailSheet(props: {
 
 		const newId = taxRateId || null;
 		setSavingTaxRate(true);
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: MenuItem & { error?: string; message?: string };
 			status: number;
 		}>(`/api/menu-items/${item.id}`, {

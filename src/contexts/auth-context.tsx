@@ -1,21 +1,12 @@
 import { createContext, createSignal, type JSX, useContext } from "solid-js";
-import { customFetch } from "~/api/client";
+import { signOut as apiSignOut, me } from "~/api/generated/sdk.gen";
+import type { UserSummary, UserTenant } from "~/api/generated/types.gen";
 
-export interface AuthUser {
-	id: string;
-	email: string;
-	name: string;
-	email_verified: boolean;
-}
-
-export interface AuthTenant {
-	tenant_id: string;
-	role: string;
-}
+export type { UserSummary as AuthUser, UserTenant as AuthTenant };
 
 interface AuthContextValue {
-	user: () => AuthUser | null;
-	tenants: () => AuthTenant[];
+	user: () => UserSummary | null;
+	tenants: () => UserTenant[];
 	loading: () => boolean;
 	signOut: () => Promise<void>;
 	refreshMe: () => Promise<void>;
@@ -26,21 +17,18 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>();
 
 export function AuthProvider(props: { children: JSX.Element }) {
-	const [user, setUser] = createSignal<AuthUser | null>(null);
-	const [tenants, setTenants] = createSignal<AuthTenant[]>([]);
+	const [user, setUser] = createSignal<UserSummary | null>(null);
+	const [tenants, setTenants] = createSignal<UserTenant[]>([]);
 	const [loading, setLoading] = createSignal(true);
 	let checked = false;
 
 	async function refreshMe() {
 		try {
-			const res = await customFetch<{
-				data: { user: AuthUser; tenants: AuthTenant[] };
-				status: number;
-			}>("/api/auth/me");
+			const { data } = await me();
 
-			if (res.status === 200) {
-				setUser(res.data.user);
-				setTenants(res.data.tenants);
+			if (data) {
+				setUser(data.user);
+				setTenants(data.tenants);
 			} else {
 				setUser(null);
 				setTenants([]);
@@ -57,10 +45,15 @@ export function AuthProvider(props: { children: JSX.Element }) {
 		refreshMe().then(() => setLoading(false));
 	}
 
-	async function signOut() {
-		await customFetch("/api/auth/sign-out", { method: "POST" });
+	function signOut(): Promise<void> {
 		setUser(null);
 		setTenants([]);
+
+		void apiSignOut().catch(() => {
+			// ignore network/server errors during sign-out; user is already signed out locally
+		});
+
+		return Promise.resolve();
 	}
 
 	const ctx: AuthContextValue = {

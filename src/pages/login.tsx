@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { passkeyLoginFinish, passkeyLoginStart, signIn } from "~/api/generated/sdk.gen";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { authenticatePasskey, isWebAuthnSupported } from "~/lib/webauthn";
@@ -25,40 +25,26 @@ export default function LoginPage() {
 		setIsPasskeyLoading(true);
 
 		try {
-			const startRes = await customFetch<{
-				data: Record<string, unknown>;
-				status: number;
-			}>("/api/auth/passkeys/login/start", {
-				method: "POST",
-				body: JSON.stringify({ email: email() }),
+			const { data: startData, error: startError } = await passkeyLoginStart({
+				body: { email: email() },
 			});
 
-			if (startRes.status === 404) {
+			if (startError) {
 				setError("No passkeys registered for this account.");
 				setIsPasskeyLoading(false);
 				return;
 			}
 
-			if (startRes.status !== 200) {
-				setError("Failed to start passkey authentication.");
-				setIsPasskeyLoading(false);
-				return;
-			}
+			const credential = await authenticatePasskey(startData as unknown as Record<string, unknown>);
 
-			const credential = await authenticatePasskey(startRes.data);
+			const { data: finishData } = await passkeyLoginFinish({
+				body: credential,
+			});
 
-			const finishRes = await customFetch<{ data?: { message?: string }; status: number }>(
-				"/api/auth/passkeys/login/finish",
-				{
-					method: "POST",
-					body: JSON.stringify(credential),
-				},
-			);
-
-			if (finishRes.status === 200) {
+			if (finishData) {
 				navigate({ to: "/" });
 			} else {
-				setError(finishRes.data?.message ?? "Passkey authentication failed.");
+				setError("Passkey authentication failed.");
 			}
 		} catch (err) {
 			if (err instanceof Error && err.name === "NotAllowedError") {
@@ -86,18 +72,14 @@ export default function LoginPage() {
 
 		setIsSubmitting(true);
 		try {
-			const res = await customFetch<{
-				data: { user?: unknown; error?: string; message?: string };
-				status: number;
-			}>("/api/auth/sign-in", {
-				method: "POST",
-				body: JSON.stringify({ email: email(), password: password() }),
+			const { data } = await signIn({
+				body: { email: email(), password: password() },
 			});
 
-			if (res.status === 200) {
+			if (data) {
 				navigate({ to: "/" });
 			} else {
-				setError(res.data?.error ?? res.data?.message ?? "Sign in failed");
+				setError("Invalid email or password");
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "An unexpected error occurred");

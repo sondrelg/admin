@@ -1,6 +1,6 @@
 import { Link, useSearch } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { resetPassword } from "~/api/generated/sdk.gen";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
@@ -35,24 +35,20 @@ export default function ResetPasswordPage() {
 
 		setIsSubmitting(true);
 
-		const res = await customFetch<{ data?: { message?: string }; status: number }>(
-			"/api/auth/reset-password",
-			{
-				method: "POST",
-				body: JSON.stringify({ token: token(), new_password: newPassword() }),
-			},
-		);
+		const { data, response } = await resetPassword({
+			body: { token: token(), new_password: newPassword() },
+		});
 
 		setIsSubmitting(false);
 
-		if (res.status === 200) {
+		if (data !== undefined) {
 			setSuccess(true);
-		} else if (res.status === 404) {
+		} else if (response?.status === 404) {
 			setError("This reset link is invalid or has expired. Please request a new one.");
-		} else if (res.status === 400) {
-			setError(res.data?.message ?? "Password is too short.");
+		} else if (response?.status === 400) {
+			setError("Password is too short.");
 		} else {
-			setError(res.data?.message ?? "Something went wrong. Please try again.");
+			setError("Something went wrong. Please try again.");
 		}
 	};
 

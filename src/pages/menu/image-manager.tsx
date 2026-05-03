@@ -1,5 +1,5 @@
 import { createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import type { MenuItemImage } from "./types";
 
 function formatSize(bytes: number): string {
@@ -17,7 +17,7 @@ export function ImageManager(props: { itemId: string }) {
 	let fileInput!: HTMLInputElement;
 
 	const fetchImages = async () => {
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: MenuItemImage[];
 			status: number;
 		}>(`/api/menu-items/${props.itemId}/images`);
@@ -55,7 +55,7 @@ export function ImageManager(props: { itemId: string }) {
 			const formData = new FormData();
 			formData.append("file", file);
 
-			const res = await customFetch<{
+			const res = await apiFetch<{
 				data: MenuItemImage & { error?: string };
 				status: number;
 			}>(`/api/menu-items/${props.itemId}/images`, {
@@ -77,7 +77,7 @@ export function ImageManager(props: { itemId: string }) {
 	};
 
 	const handleDelete = async (imageId: string) => {
-		const res = await customFetch<{ status: number }>(
+		const res = await apiFetch<{ status: number }>(
 			`/api/menu-items/${props.itemId}/images/${imageId}`,
 			{ method: "DELETE" },
 		);

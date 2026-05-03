@@ -1,5 +1,5 @@
 import { createSignal, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
@@ -15,7 +15,7 @@ export default function SummaryPage() {
 
 		setIsCreatingRegister(true);
 		try {
-			const res = await customFetch<{
+			const res = await apiFetch<{
 				data: { id: string; message?: string };
 				status: number;
 			}>("/api/registers", {

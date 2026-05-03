@@ -1,5 +1,5 @@
 import { createSignal, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { listPasskeys, passkeyRegisterFinish, passkeyRegisterStart } from "~/api/generated/sdk.gen";
 import { Button } from "~/components/ui/button";
 import { createPasskey, isWebAuthnSupported } from "~/lib/webauthn";
 
@@ -15,8 +15,8 @@ export function PasskeyPrompt() {
 		if (!isWebAuthnSupported()) return;
 		if (localStorage.getItem(DISMISS_KEY)) return;
 
-		const res = await customFetch<{ data: unknown[]; status: number }>("/api/auth/passkeys");
-		if (res.status === 200 && res.data.length === 0) {
+		const { data } = await listPasskeys();
+		if (data && data.length === 0) {
 			setVisible(true);
 		}
 	});
@@ -31,35 +31,27 @@ export function PasskeyPrompt() {
 		setRegistering(true);
 
 		try {
-			const startRes = await customFetch<{
-				data: Record<string, unknown>;
-				status: number;
-			}>("/api/auth/passkeys/register/start", {
-				method: "POST",
-				body: JSON.stringify({ name: "My passkey" }),
+			const { data: startData } = await passkeyRegisterStart({
+				body: { name: "My passkey" },
 			});
 
-			if (startRes.status !== 200) {
+			if (!startData) {
 				setError("Failed to start registration.");
 				setRegistering(false);
 				return;
 			}
 
-			const credential = await createPasskey(startRes.data);
+			const credential = await createPasskey(startData as unknown as Record<string, unknown>);
 
-			const finishRes = await customFetch<{ data?: { message?: string }; status: number }>(
-				"/api/auth/passkeys/register/finish",
-				{
-					method: "POST",
-					body: JSON.stringify(credential),
-				},
-			);
+			const { data: finishData } = await passkeyRegisterFinish({
+				body: credential,
+			});
 
-			if (finishRes.status === 201) {
+			if (finishData) {
 				setSuccess(true);
 				setTimeout(dismiss, 2000);
 			} else {
-				setError(finishRes.data?.message ?? "Registration failed.");
+				setError("Registration failed.");
 			}
 		} catch (err) {
 			if (err instanceof Error && err.name === "NotAllowedError") {

@@ -1,6 +1,6 @@
 import { createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
@@ -39,7 +39,7 @@ export default function TaxRatesPage() {
 	const [deletingId, setDeletingId] = createSignal<string | null>(null);
 
 	const fetchRates = async () => {
-		const res = await customFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates");
+		const res = await apiFetch<{ data: TaxRate[]; status: number }>("/api/tax-rates");
 		if (res.status === 200) {
 			setRows(
 				res.data.map((r) => ({
@@ -83,7 +83,7 @@ export default function TaxRatesPage() {
 		if (!row.id) return;
 
 		setDeletingId(row.id);
-		const res = await customFetch<{ data: { error?: string; message?: string }; status: number }>(
+		const res = await apiFetch<{ data: { error?: string; message?: string }; status: number }>(
 			`/api/tax-rates/${row.id}`,
 			{ method: "DELETE" },
 		);
@@ -117,7 +117,7 @@ export default function TaxRatesPage() {
 		};
 
 		if (row.isNew) {
-			const res = await customFetch<{
+			const res = await apiFetch<{
 				data: TaxRate & { error?: string; message?: string };
 				status: number;
 			}>("/api/tax-rates", {
@@ -142,7 +142,7 @@ export default function TaxRatesPage() {
 				setError(res.data?.error ?? res.data?.message ?? "Failed to create tax rate");
 			}
 		} else {
-			const res = await customFetch<{
+			const res = await apiFetch<{
 				data: TaxRate & { error?: string; message?: string };
 				status: number;
 			}>(`/api/tax-rates/${row.id}`, {

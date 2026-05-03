@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/solid-router";
 import { createEffect, createSignal, Show } from "solid-js";
-import { customFetch, setTenantId } from "~/api/client";
+import { setTenantId } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
@@ -74,7 +75,7 @@ export default function BusinessPage() {
 			// Step 1: Create tenant (skip if already created and still exists)
 			let tenantId = state.tenant?.id;
 			if (tenantId) {
-				const checkRes = await customFetch<{ status: number }>(`/api/tenants/${tenantId}`);
+				const checkRes = await apiFetch<{ status: number }>(`/api/tenants/${tenantId}`);
 				if (checkRes.status === 404) {
 					// Tenant was deleted (e.g. DB reset) — clear stale state
 					reset();
@@ -82,7 +83,7 @@ export default function BusinessPage() {
 				}
 			}
 			if (!tenantId) {
-				const tenantRes = await customFetch<{
+				const tenantRes = await apiFetch<{
 					data: { id: string; name: string; slug: string; error?: string; message?: string };
 					status: number;
 				}>("/api/tenants", {
@@ -112,7 +113,7 @@ export default function BusinessPage() {
 
 			// Step 2: Create location (skip if already created)
 			if (!state.location) {
-				const locRes = await customFetch<{
+				const locRes = await apiFetch<{
 					data: { id: string; name: string; error?: string; message?: string };
 					status: number;
 				}>("/api/locations", {

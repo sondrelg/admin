@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
@@ -43,7 +43,7 @@ export default function StaffPage() {
 			// Create staff (skip if already created)
 			let staffId = state.staff?.id;
 			if (!staffId) {
-				const staffRes = await customFetch<{
+				const staffRes = await apiFetch<{
 					data: { id: string; name: string; error?: string; message?: string };
 					status: number;
 				}>("/api/staff", {
@@ -66,7 +66,7 @@ export default function StaffPage() {
 			}
 
 			// Set PIN credential
-			const credRes = await customFetch<{
+			const credRes = await apiFetch<{
 				data: { error?: string; message?: string };
 				status: number;
 			}>(`/api/staff/${staffId}/credentials`, {

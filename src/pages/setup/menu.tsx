@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/solid-router";
 import { createSignal, For, Show } from "solid-js";
 import { createStore, produce } from "solid-js/store";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
@@ -123,7 +123,7 @@ export default function MenuPage() {
 				const cat = validCats[catIdx];
 				setProgress(`Creating category "${cat.name}"...`);
 
-				const catRes = await customFetch<{
+				const catRes = await apiFetch<{
 					data: { id: string; name: string; message?: string };
 					status: number;
 				}>("/api/categories", {
@@ -149,7 +149,7 @@ export default function MenuPage() {
 				const itemResults = await Promise.all(
 					validItems.map((item, itemIdx) => {
 						const taxRate = taxRates()[item.taxRateIndex];
-						return customFetch<{
+						return apiFetch<{
 							data: { id: string; message?: string };
 							status: number;
 						}>("/api/menu-items", {

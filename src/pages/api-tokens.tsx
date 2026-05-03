@@ -1,5 +1,5 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { formatDate, formatDateTime } from "~/lib/datetime";
@@ -64,7 +64,7 @@ export default function ApiTokensPage() {
 	);
 
 	const fetchTokens = async () => {
-		const res = await customFetch<{ data: ApiToken[]; status: number }>("/api/api-tokens");
+		const res = await apiFetch<{ data: ApiToken[]; status: number }>("/api/api-tokens");
 		if (res.status === 200) setTokens(res.data);
 		setLoading(false);
 	};
@@ -87,7 +87,7 @@ export default function ApiTokensPage() {
 			body.expires_at = new Date(expiresAt()).toISOString();
 		}
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: ApiToken & { secret: string; message?: string };
 			status: number;
 		}>("/api/api-tokens", {
@@ -118,7 +118,7 @@ export default function ApiTokensPage() {
 
 	const handleRevoke = async (id: string) => {
 		setRevoking(true);
-		const res = await customFetch<{ status: number }>(`/api/api-tokens/${id}/revoke`, {
+		const res = await apiFetch<{ status: number }>(`/api/api-tokens/${id}/revoke`, {
 			method: "POST",
 		});
 		setRevoking(false);

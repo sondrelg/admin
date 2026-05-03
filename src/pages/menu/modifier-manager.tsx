@@ -1,5 +1,5 @@
 import { createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import type { Modifier, ModifierGroup } from "./types";
 import { formatPrice, parsePriceToMinor } from "./types";
@@ -29,7 +29,7 @@ export function ModifierGroupManager(props: {
 		setCreating(true);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: ModifierGroup & { error?: string; message?: string };
 			status: number;
 		}>("/api/modifier-groups", {
@@ -60,7 +60,7 @@ export function ModifierGroupManager(props: {
 		setSavingId(id);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: ModifierGroup & { error?: string; message?: string };
 			status: number;
 		}>(`/api/modifier-groups/${id}`, {
@@ -86,7 +86,7 @@ export function ModifierGroupManager(props: {
 		setDeletingId(id);
 		setError(null);
 
-		const res = await customFetch<{ status: number }>(`/api/modifier-groups/${id}`, {
+		const res = await apiFetch<{ status: number }>(`/api/modifier-groups/${id}`, {
 			method: "DELETE",
 		});
 
@@ -273,7 +273,7 @@ function ModifierList(props: { groupId: string }) {
 	const [deletingId, setDeletingId] = createSignal<string | null>(null);
 
 	const fetchModifiers = async () => {
-		const res = await customFetch<{ data: Modifier[]; status: number }>(
+		const res = await apiFetch<{ data: Modifier[]; status: number }>(
 			`/api/modifier-groups/${props.groupId}/modifiers`,
 		);
 		if (res.status === 200) setModifiers(res.data);
@@ -290,7 +290,7 @@ function ModifierList(props: { groupId: string }) {
 		const priceMinor = parsePriceToMinor(newPrice());
 		if (priceMinor !== 0) body.price_minor_unit = priceMinor;
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Modifier & { error?: string; message?: string };
 			status: number;
 		}>(`/api/modifier-groups/${props.groupId}/modifiers`, {
@@ -308,7 +308,7 @@ function ModifierList(props: { groupId: string }) {
 
 	const handleDelete = async (modId: string) => {
 		setDeletingId(modId);
-		const res = await customFetch<{ status: number }>(
+		const res = await apiFetch<{ status: number }>(
 			`/api/modifier-groups/${props.groupId}/modifiers/${modId}`,
 			{ method: "DELETE" },
 		);

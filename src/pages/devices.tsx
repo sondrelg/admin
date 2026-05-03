@@ -1,5 +1,5 @@
 import { createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -36,7 +36,7 @@ export default function DevicesPage() {
 	const [editDevice, setEditDevice] = createSignal<Device | null>(null);
 
 	const fetchDevices = async () => {
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Device[] & { error?: string; message?: string };
 			status: number;
 		}>("/api/devices");
@@ -197,7 +197,7 @@ function PairDeviceDialog(props: {
 
 		setSubmitting(true);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: ActivationCode & { error?: string; message?: string };
 			status: number;
 		}>("/api/devices/activation-codes", {
@@ -334,7 +334,7 @@ function ManageDeviceDialog(props: {
 		setSaving(true);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Device & { error?: string; message?: string };
 			status: number;
 		}>(`/api/devices/${device.id}`, {
@@ -358,7 +358,7 @@ function ManageDeviceDialog(props: {
 		setDeactivating(true);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: { error?: string; message?: string };
 			status: number;
 		}>(`/api/devices/${device.id}`, { method: "DELETE" });

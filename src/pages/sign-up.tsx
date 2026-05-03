@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { signUp } from "~/api/generated/sdk.gen";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
@@ -34,18 +34,14 @@ export default function SignUpPage() {
 
 		setIsSubmitting(true);
 		try {
-			const res = await customFetch<{
-				data: { user?: unknown; error?: string; message?: string };
-				status: number;
-			}>("/api/auth/sign-up", {
-				method: "POST",
-				body: JSON.stringify({ email: email(), password: password(), name: name() }),
+			const { data } = await signUp({
+				body: { email: email(), password: password(), name: name() },
 			});
 
-			if (res.status === 201) {
+			if (data) {
 				navigate({ to: "/setup/business" });
 			} else {
-				setError(res.data?.error ?? res.data?.message ?? "Sign up failed");
+				setError("Sign up failed");
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "An unexpected error occurred");

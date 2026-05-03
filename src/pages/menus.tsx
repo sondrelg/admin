@@ -1,5 +1,5 @@
 import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { customFetch } from "~/api/client";
+import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -112,8 +112,8 @@ export default function MenusPage() {
 
 	const fetchMenus = async () => {
 		const [menusRes, itemsRes] = await Promise.all([
-			customFetch<{ data: Menu[]; status: number }>("/api/menus"),
-			customFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
+			apiFetch<{ data: Menu[]; status: number }>("/api/menus"),
+			apiFetch<{ data: MenuItem[]; status: number }>("/api/menu-items"),
 		]);
 		if (menusRes.status === 200) setMenus(menusRes.data);
 		else {
@@ -265,7 +265,7 @@ function CreateMenuDialog(props: {
 		setSubmitting(true);
 		setError(null);
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Menu & { error?: string; message?: string };
 			status: number;
 		}>("/api/menus", {
@@ -362,7 +362,7 @@ function MenuDetailSheet(props: {
 	});
 
 	const fetchDetails = async (menuId: string) => {
-		const assignRes = await customFetch<{
+		const assignRes = await apiFetch<{
 			data: MenuItemAssignment[];
 			status: number;
 		}>(`/api/menus/${menuId}/items`);
@@ -391,7 +391,7 @@ function MenuDetailSheet(props: {
 			active_days: activeDays(),
 		};
 
-		const res = await customFetch<{
+		const res = await apiFetch<{
 			data: Menu & { error?: string; message?: string };
 			status: number;
 		}>(`/api/menus/${menu.id}`, {
@@ -413,7 +413,7 @@ function MenuDetailSheet(props: {
 		if (!menu) return;
 
 		setDeleting(true);
-		const res = await customFetch<{ status: number }>(`/api/menus/${menu.id}`, {
+		const res = await apiFetch<{ status: number }>(`/api/menus/${menu.id}`, {
 			method: "DELETE",
 		});
 		setDeleting(false);
@@ -440,7 +440,7 @@ function MenuDetailSheet(props: {
 			display_order: i,
 		}));
 
-		const res = await customFetch<{ status: number }>(`/api/menus/${menu.id}/items`, {
+		const res = await apiFetch<{ status: number }>(`/api/menus/${menu.id}/items`, {
 			method: "PUT",
 			body: JSON.stringify({ items }),
 		});
