@@ -70,7 +70,7 @@ export default function TaxRatesPage() {
 		setError(null);
 
 		if (rows.length === 0) {
-			setError("Add at least one VAT rate");
+			setError("Add at least one VAT rate, or skip this step.");
 			return;
 		}
 
@@ -213,9 +213,14 @@ export default function TaxRatesPage() {
 					<Button type="button" variant="outline" onClick={() => navigate({ to: "/setup/staff" })}>
 						Back
 					</Button>
-					<Button type="submit" disabled={isSubmitting()}>
-						{isSubmitting() ? "Creating..." : "Next"}
-					</Button>
+					<div class="flex items-center gap-2">
+						<Button type="button" variant="ghost" onClick={() => navigate({ to: "/setup/menu" })}>
+							Skip
+						</Button>
+						<Button type="submit" disabled={isSubmitting()}>
+							{isSubmitting() ? "Creating..." : "Next"}
+						</Button>
+					</div>
 				</div>
 			</form>
 		</WizardLayout>

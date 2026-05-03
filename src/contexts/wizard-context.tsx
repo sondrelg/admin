@@ -13,7 +13,6 @@ import { setTenantId } from "~/api/client";
 export interface WizardTenant {
 	id: string;
 	name: string;
-	slug: string;
 }
 
 export interface WizardLocation {
@@ -38,6 +37,14 @@ export interface WizardCategory {
 	name: string;
 }
 
+export interface SetupBusinessDraft {
+	address: string;
+	city: string;
+	locationName: string;
+	orgNumber: string;
+	postalCode: string;
+}
+
 export interface WizardState {
 	tenant: WizardTenant | null;
 	location: WizardLocation | null;
@@ -46,18 +53,31 @@ export interface WizardState {
 	categories: WizardCategory[];
 	menuItemCount: number;
 	registerId: string | null;
+	setupBusinessDraft: SetupBusinessDraft;
 }
 
 const STORAGE_KEY = "smls_wizard_state";
 
 function loadState(): WizardState {
+	const fallback = defaultState();
+
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
-		if (raw) return JSON.parse(raw);
+		if (!raw) return fallback;
+
+		const parsed = JSON.parse(raw) as Partial<WizardState>;
+		return {
+			...fallback,
+			...parsed,
+			setupBusinessDraft: {
+				...fallback.setupBusinessDraft,
+				...parsed.setupBusinessDraft,
+			},
+		};
 	} catch {
 		// ignore
 	}
-	return defaultState();
+	return fallback;
 }
 
 function defaultState(): WizardState {
@@ -69,6 +89,13 @@ function defaultState(): WizardState {
 		categories: [],
 		menuItemCount: 0,
 		registerId: null,
+		setupBusinessDraft: {
+			address: "",
+			city: "",
+			locationName: "",
+			orgNumber: "",
+			postalCode: "",
+		},
 	};
 }
 
@@ -81,6 +108,7 @@ interface WizardContextValue {
 	setCategories: (cats: WizardCategory[]) => void;
 	setMenuItemCount: (count: number) => void;
 	setRegisterId: (id: string) => void;
+	setSetupBusinessDraft: (draft: SetupBusinessDraft) => void;
 	reset: () => void;
 	isComplete: Accessor<boolean>;
 }
@@ -117,6 +145,7 @@ export function WizardProvider(props: { children: JSX.Element }) {
 		setCategories: (cats) => setState("categories", cats),
 		setMenuItemCount: (count) => setState("menuItemCount", count),
 		setRegisterId: (id) => setState("registerId", id),
+		setSetupBusinessDraft: (draft) => setState("setupBusinessDraft", draft),
 		reset: () => {
 			localStorage.removeItem(STORAGE_KEY);
 			setState(reconcile(defaultState()));

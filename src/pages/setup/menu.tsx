@@ -1,11 +1,12 @@
 import { useNavigate } from "@tanstack/solid-router";
-import { createSignal, For, Show } from "solid-js";
-import { createStore, produce } from "solid-js/store";
+import { createSignal, For, onCleanup, Show } from "solid-js";
+import { createStore, produce, reconcile } from "solid-js/store";
 import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { WizardLayout } from "~/components/wizard/wizard-layout";
 import { useWizard } from "~/contexts/wizard-context";
-import { restaurantCafe } from "~/templates/restaurant-cafe";
+import { industryTemplates } from "~/templates/industry-templates";
+import type { Template } from "~/templates/restaurant-cafe";
 
 interface MenuItem {
 	name: string;
@@ -20,11 +21,20 @@ interface Category {
 	collapsed: boolean;
 }
 
+function scrollToFirstInlineError() {
+	const firstErrorField = document.querySelector(".border-destructive") as HTMLElement | null;
+	if (firstErrorField) {
+		firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+		firstErrorField.focus();
+	}
+}
+
 export default function MenuPage() {
 	const navigate = useNavigate();
 	const { state, setCategories, setMenuItemCount } = useWizard();
 
-	const initialCategories: Category[] = restaurantCafe.categories.map((c) => ({
+	const defaultTemplate = industryTemplates[0];
+	const initialCategories: Category[] = defaultTemplate.categories.map((c) => ({
 		name: c.name,
 		color: c.color,
 		items: c.items.map((item) => ({ ...item })),
@@ -32,9 +42,13 @@ export default function MenuPage() {
 	}));
 
 	const [categories, setStore] = createStore<Category[]>(initialCategories);
+	const [selectedTemplateName, setSelectedTemplateName] = createSignal(defaultTemplate.name);
+	const [isTemplateChooserExpanded, setIsTemplateChooserExpanded] = createSignal(true);
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
 	const [progress, setProgress] = createSignal("");
+	const [hasAttemptedSubmit, setHasAttemptedSubmit] = createSignal(false);
+	const [hasLocalEdits, setHasLocalEdits] = createSignal(false);
 
 	const taxRates = () => state.taxRates;
 
@@ -46,6 +60,7 @@ export default function MenuPage() {
 		field: keyof MenuItem,
 		value: string | number,
 	) => {
+		setHasLocalEdits(true);
 		setStore(
 			produce((cats) => {
 				const item = cats[catIdx].items[itemIdx];
@@ -61,6 +76,7 @@ export default function MenuPage() {
 	};
 
 	const removeItem = (catIdx: number, itemIdx: number) => {
+		setHasLocalEdits(true);
 		setStore(
 			produce((cats) => {
 				cats[catIdx].items.splice(itemIdx, 1);
@@ -69,6 +85,7 @@ export default function MenuPage() {
 	};
 
 	const addItem = (catIdx: number) => {
+		setHasLocalEdits(true);
 		setStore(
 			produce((cats) => {
 				cats[catIdx].items.push({
@@ -81,10 +98,12 @@ export default function MenuPage() {
 	};
 
 	const removeCategory = (catIdx: number) => {
+		setHasLocalEdits(true);
 		setStore((prev) => prev.filter((_, i) => i !== catIdx));
 	};
 
 	const addCategory = () => {
+		setHasLocalEdits(true);
 		setStore(categories.length, {
 			name: "",
 			color: "#6B7280",
@@ -97,8 +116,46 @@ export default function MenuPage() {
 		setStore(catIdx, "collapsed", (prev) => !prev);
 	};
 
+	const confirmDiscardChanges = () => {
+		if (!hasLocalEdits() || isSubmitting()) return true;
+		return window.confirm("You have unsaved menu changes. Leave this step?");
+	};
+
+	const navigateWithGuard = (to: string) => {
+		if (!confirmDiscardChanges()) return;
+		navigate({ to });
+	};
+
+	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+		if (!hasLocalEdits() || isSubmitting()) return;
+		event.preventDefault();
+		event.returnValue = "";
+	};
+
+	window.addEventListener("beforeunload", handleBeforeUnload);
+	onCleanup(() => {
+		window.removeEventListener("beforeunload", handleBeforeUnload);
+	});
+
+	const applyTemplate = (template: Template) => {
+		setHasLocalEdits(true);
+		setSelectedTemplateName(template.name);
+		setIsTemplateChooserExpanded(false);
+		setStore(
+			reconcile(
+				template.categories.map((c) => ({
+					name: c.name,
+					color: c.color,
+					items: c.items.map((item) => ({ ...item })),
+					collapsed: false,
+				})),
+			),
+		);
+	};
+
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
+		setHasAttemptedSubmit(true);
 		setError(null);
 
 		// Skip if already created
@@ -107,9 +164,20 @@ export default function MenuPage() {
 			return;
 		}
 
+		if (taxRates().length === 0) {
+			setError("Create tax rates first, or go back and add at least one rate.");
+			return;
+		}
+
 		const validCats = categories.filter((c) => c.name.trim());
 		if (validCats.length === 0) {
 			setError("Add at least one category");
+			return;
+		}
+
+		if (validCats.some((cat) => cat.items.some((item) => !item.name.trim()))) {
+			setError("Please name all menu items or remove empty rows.");
+			queueMicrotask(scrollToFirstInlineError);
 			return;
 		}
 
@@ -176,6 +244,7 @@ export default function MenuPage() {
 
 			setCategories(createdCats);
 			setMenuItemCount(itemCount);
+			setHasLocalEdits(false);
 			navigate({ to: "/setup/summary" });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "An unexpected error occurred");
@@ -189,15 +258,52 @@ export default function MenuPage() {
 		<WizardLayout
 			step={4}
 			title="Your Menu"
-			description="Pre-filled with a typical cafe menu. Edit names, prices, and categories to match your business."
+			description="Pick a template for your industry, then tweak names, prices, and categories."
 		>
 			<form onSubmit={handleSubmit} class="space-y-4">
+				<Show when={taxRates().length === 0}>
+					<div class="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+						Add at least one tax rate before creating menu items.
+					</div>
+				</Show>
+				<div class="rounded-xl border bg-card p-4 shadow-sm">
+					<div class="mb-3 flex items-center justify-between gap-2">
+						<p class="text-sm font-medium">Template</p>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() => setIsTemplateChooserExpanded((prev) => !prev)}
+						>
+							{isTemplateChooserExpanded() ? "Hide" : "Change"}
+						</Button>
+					</div>
+					<Show
+						when={isTemplateChooserExpanded()}
+						fallback={<p class="text-sm text-muted-foreground">{selectedTemplateName()}</p>}
+					>
+						<div class="grid grid-cols-1 gap-2 md:grid-cols-3">
+							<For each={industryTemplates}>
+								{(template) => (
+									<Button
+										type="button"
+										variant={selectedTemplateName() === template.name ? "default" : "outline"}
+										onClick={() => applyTemplate(template)}
+									>
+										{template.name}
+									</Button>
+								)}
+							</For>
+						</div>
+					</Show>
+				</div>
 				<For each={categories}>
 					{(cat, catIdx) => (
 						<div class="rounded-xl border bg-card shadow-sm">
 							<div class="flex items-center gap-3 border-b p-4">
 								<button
 									type="button"
+									aria-label="Toggle category"
 									class="text-muted-foreground hover:text-foreground"
 									onClick={() => toggleCollapse(catIdx())}
 								>
@@ -220,16 +326,22 @@ export default function MenuPage() {
 								<input
 									type="text"
 									value={cat.name}
-									onInput={(e) => setStore(catIdx(), "name", e.currentTarget.value)}
-									class="flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-muted-foreground"
+									onInput={(e) => {
+										setHasLocalEdits(true);
+										setStore(catIdx(), "name", e.currentTarget.value);
+									}}
+									class="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-muted-foreground"
 									placeholder="Category name"
 								/>
-								<span class="text-sm text-muted-foreground">{cat.items.length} items</span>
+								<span class="shrink-0 whitespace-nowrap text-right text-sm text-muted-foreground">
+									{cat.items.length} items
+								</span>
 								<Show when={categories.length > 1}>
 									<Button
 										type="button"
 										variant="ghost"
 										size="sm"
+										aria-label="Remove category"
 										class="text-muted-foreground hover:text-destructive"
 										onClick={() => removeCategory(catIdx())}
 									>
@@ -255,7 +367,7 @@ export default function MenuPage() {
 								<div class="divide-y">
 									<For each={cat.items}>
 										{(item, itemIdx) => (
-											<div class="flex items-center gap-3 px-4 py-2">
+											<div class="relative grid grid-cols-1 gap-2 px-4 py-2 pr-12 md:flex md:items-center md:gap-3">
 												<input
 													type="text"
 													value={item.name}
@@ -263,11 +375,17 @@ export default function MenuPage() {
 														updateItem(catIdx(), itemIdx(), "name", e.currentTarget.value)
 													}
 													class="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+													classList={{
+														"rounded-md border border-destructive px-2 py-1":
+															hasAttemptedSubmit() && !item.name.trim(),
+													}}
 													placeholder="Item name"
 												/>
-												<div class="w-20">
+												<div class="flex w-full items-center gap-2 md:w-28">
+													<span class="shrink-0 text-xs text-muted-foreground">kr</span>
 													<input
 														type="number"
+														inputMode="numeric"
 														value={Math.round(item.priceMinorUnit / 100)}
 														onInput={(e) =>
 															updateItem(
@@ -281,7 +399,6 @@ export default function MenuPage() {
 														min="0"
 													/>
 												</div>
-												<span class="w-8 text-xs text-muted-foreground">kr</span>
 												<select
 													value={item.taxRateIndex}
 													onChange={(e) =>
@@ -292,7 +409,7 @@ export default function MenuPage() {
 															Number.parseInt(e.currentTarget.value, 10),
 														)
 													}
-													class="rounded-md border bg-transparent px-2 py-1 text-sm"
+													class="w-full rounded-md border bg-transparent px-2 py-1 text-center text-sm md:w-auto"
 												>
 													<For each={taxRates()}>
 														{(rate, rateIdx) => (
@@ -310,7 +427,8 @@ export default function MenuPage() {
 													type="button"
 													variant="ghost"
 													size="sm"
-													class="text-muted-foreground hover:text-destructive"
+													aria-label="Remove menu item"
+													class="absolute right-1 top-1 min-h-11 min-w-11 text-muted-foreground hover:text-destructive"
 													onClick={() => removeItem(catIdx(), itemIdx())}
 												>
 													<svg
@@ -360,17 +478,28 @@ export default function MenuPage() {
 					<div class="rounded-md bg-primary/10 p-3 text-sm text-primary">{progress()}</div>
 				</Show>
 
-				<div class="flex justify-between">
+				<div class="sticky bottom-2 z-10 flex justify-between rounded-lg border bg-background/95 p-2 backdrop-blur">
 					<Button
 						type="button"
 						variant="outline"
-						onClick={() => navigate({ to: "/setup/tax-rates" })}
+						onClick={() => navigateWithGuard("/setup/tax-rates")}
 					>
 						Back
 					</Button>
-					<Button type="submit" disabled={isSubmitting()}>
-						{isSubmitting() ? `Creating ${totalItems()} items...` : `Next (${totalItems()} items)`}
-					</Button>
+					<div class="flex items-center gap-2">
+						<Button
+							type="button"
+							variant="ghost"
+							onClick={() => navigateWithGuard("/setup/summary")}
+						>
+							Skip
+						</Button>
+						<Button type="submit" disabled={isSubmitting() || taxRates().length === 0}>
+							{isSubmitting()
+								? `Creating ${totalItems()} items...`
+								: `Next (${totalItems()} items)`}
+						</Button>
+					</div>
 				</div>
 			</form>
 		</WizardLayout>

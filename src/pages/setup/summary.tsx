@@ -48,11 +48,7 @@ export default function SummaryPage() {
 			<div class="space-y-4">
 				<div class="rounded-xl border bg-card p-6 shadow-sm">
 					<div class="space-y-4">
-						<SummaryRow
-							label="Business"
-							value={state.tenant?.name ?? ""}
-							detail={state.tenant?.slug ?? ""}
-						/>
+						<SummaryRow label="Business" value={state.tenant?.name ?? ""} />
 						<SummaryRow label="Location" value={state.location?.name ?? ""} />
 						<SummaryRow label="Manager" value={state.staff?.name ?? ""} />
 						<SummaryRow

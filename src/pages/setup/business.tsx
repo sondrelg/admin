@@ -12,22 +12,27 @@ import { slugify } from "~/lib/slug";
 
 export default function BusinessPage() {
 	const navigate = useNavigate();
-	const { state, setTenant, setLocation, reset } = useWizard();
+	const { state, setTenant, setLocation, setSetupBusinessDraft, reset } = useWizard();
 
 	const [businessName, setBusinessName] = createSignal(state.tenant?.name ?? "");
-	const [slug, setSlug] = createSignal(state.tenant?.slug ?? "");
-	const [slugTouched, setSlugTouched] = createSignal(false);
-	const [locationName, setLocationName] = createSignal(state.location?.name ?? "");
-	const [address, setAddress] = createSignal("");
-	const [city, setCity] = createSignal("");
-	const [postalCode, setPostalCode] = createSignal("");
-	const [orgNumber, setOrgNumber] = createSignal("");
+	const slug = createMemo(() => slugify(businessName()));
+	const [locationName, setLocationName] = createSignal(
+		state.location?.name ?? state.setupBusinessDraft.locationName,
+	);
+	const [locationNameTouched, setLocationNameTouched] = createSignal(!!state.location?.name);
+	const [address, setAddress] = createSignal(state.setupBusinessDraft.address);
+	const [city, setCity] = createSignal(state.setupBusinessDraft.city);
+	const [postalCode, setPostalCode] = createSignal(state.setupBusinessDraft.postalCode);
+	const [orgNumber, setOrgNumber] = createSignal(state.setupBusinessDraft.orgNumber);
 	const [coordinates, setCoordinates] = createSignal<{
 		latitude: number;
 		longitude: number;
 	} | null>(null);
 	const [addressSuggestions, setAddressSuggestions] = createSignal<AddressSuggestionResponse[]>([]);
 	const [isSearchingAddress, setIsSearchingAddress] = createSignal(false);
+	const [isAddressInputFocused, setIsAddressInputFocused] = createSignal(false);
+	let latestAddressSearchRequestId = 0;
+	let addressBlurTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
@@ -40,58 +45,74 @@ export default function BusinessPage() {
 		return s.length >= 2 && SLUG_RE.test(s);
 	};
 
-	// Auto-generate slug from business name
+	// Auto-fill location name from business name until user edits it
 	createEffect(() => {
-		if (!slugTouched()) {
-			setSlug(slugify(businessName()));
-		}
-	});
-
-	// Auto-fill location name from business name
-	createEffect(() => {
-		if (!state.location) {
+		if (!state.location && !locationNameTouched()) {
 			setLocationName(businessName());
 		}
 	});
 
 	createEffect(() => {
+		setSetupBusinessDraft({
+			address: address(),
+			city: city(),
+			locationName: locationName(),
+			orgNumber: orgNumber(),
+			postalCode: postalCode(),
+		});
+	});
+
+	createEffect(() => {
 		const query = address().trim();
-		if (query.length < 3) {
-			setAddressSuggestions([]);
+		if (!isAddressInputFocused() || query.length < 4) {
 			setIsSearchingAddress(false);
 			return;
 		}
 
+		const requestId = ++latestAddressSearchRequestId;
 		setIsSearchingAddress(true);
 		const timeoutId = setTimeout(async () => {
 			try {
 				const { data } = await searchAddresses({ query: { q: query, limit: 5 } });
+				if (requestId !== latestAddressSearchRequestId) return;
 				setAddressSuggestions(data?.addresses ?? []);
 			} catch {
+				if (requestId !== latestAddressSearchRequestId) return;
 				setAddressSuggestions([]);
 			} finally {
-				setIsSearchingAddress(false);
+				if (requestId === latestAddressSearchRequestId) {
+					setIsSearchingAddress(false);
+				}
 			}
-		}, 250);
+		}, 450);
 
 		return () => {
 			clearTimeout(timeoutId);
 		};
 	});
 
-	const canContinue = createMemo(
+	const locationFieldsStarted = createMemo(
 		() =>
-			!!businessName().trim() &&
-			!!locationName().trim() &&
-			!!address().trim() &&
-			/^\d{4}$/.test(postalCode()) &&
-			city().trim().length >= 2 &&
-			slugValid(),
+			!!locationName().trim() ||
+			!!address().trim() ||
+			!!postalCode().trim() ||
+			!!city().trim() ||
+			!!orgNumber().trim(),
 	);
 
+	const canContinue = createMemo(() => !!businessName().trim() && slugValid());
+
 	const validate = (): string | null => {
-		if (!businessName().trim() || !locationName().trim() || !address().trim() || !slugValid()) {
-			return "Please fill in required fields to continue.";
+		if (!businessName().trim() || !slugValid()) {
+			return "Business name and valid slug are required.";
+		}
+
+		if (!locationFieldsStarted()) {
+			return null;
+		}
+
+		if (!locationName().trim() || !address().trim()) {
+			return "To create a location, fill in location name and address.";
 		}
 		if (!/^\d{4}$/.test(postalCode())) {
 			return "Postal code must be exactly 4 digits.";
@@ -147,7 +168,7 @@ export default function BusinessPage() {
 			}
 			if (!tenantId) {
 				const tenantRes = await apiFetch<{
-					data: { id: string; name: string; slug: string; error?: string; message?: string };
+					data: { id: string; name: string; error?: string; message?: string };
 					status: number;
 				}>("/api/tenants", {
 					method: "POST",
@@ -160,7 +181,9 @@ export default function BusinessPage() {
 				if (tenantRes.status !== 201) {
 					const msg = tenantRes.data?.error ?? tenantRes.data?.message ?? "";
 					if (tenantRes.status === 409 || msg.includes("slug")) {
-						setError(`Slug "${slug()}" is already taken.`);
+						setError(
+							"A similar business identifier already exists. Try a slightly different business name.",
+						);
 					} else {
 						setError(msg || "Failed to create tenant");
 					}
@@ -168,14 +191,14 @@ export default function BusinessPage() {
 				}
 
 				tenantId = tenantRes.data.id;
-				setTenant({ id: tenantId, name: tenantRes.data.name, slug: tenantRes.data.slug });
+				setTenant({ id: tenantId, name: tenantRes.data.name });
 			}
 
 			// Set tenant ID for subsequent API calls
 			setTenantId(tenantId);
 
-			// Step 2: Create location (skip if already created)
-			if (!state.location) {
+			// Step 2: Create location only when details are provided
+			if (!state.location && locationFieldsStarted()) {
 				const locRes = await apiFetch<{
 					data: { id: string; name: string; error?: string; message?: string };
 					status: number;
@@ -221,27 +244,19 @@ export default function BusinessPage() {
 							<TextFieldLabel>Business Name</TextFieldLabel>
 							<TextFieldInput placeholder="Oslo Kaffebrenneri" />
 						</TextField>
-
-						<TextField
-							value={slug()}
-							onChange={(v) => {
-								setSlugTouched(true);
-								setSlug(slugify(v));
-							}}
-						>
-							<TextFieldLabel>URL Slug</TextFieldLabel>
-							<TextFieldInput placeholder="oslo-kaffebrenneri" tabIndex={-1} />
-							<p class="mt-1 text-xs text-muted-foreground">
-								Your unique identifier: <span class="font-mono">{slug() || "..."}</span>
-							</p>
-						</TextField>
 					</div>
 				</div>
 
 				<div class="rounded-xl border bg-card p-6 shadow-sm">
 					<h2 class="mb-4 text-lg font-semibold">First Location</h2>
 					<div class="space-y-4">
-						<TextField value={locationName()} onChange={(v) => setLocationName(v)}>
+						<TextField
+							value={locationName()}
+							onChange={(v) => {
+								setLocationNameTouched(true);
+								setLocationName(v);
+							}}
+						>
 							<TextFieldLabel>Location Name</TextFieldLabel>
 							<TextFieldInput placeholder="Hovedkontor" />
 						</TextField>
@@ -260,13 +275,24 @@ export default function BusinessPage() {
 									autocomplete="street-address"
 									data-1p-ignore="true"
 									data-lpignore="true"
+									onFocus={() => {
+										if (addressBlurTimeoutId) {
+											clearTimeout(addressBlurTimeoutId);
+										}
+										setIsAddressInputFocused(true);
+									}}
+									onBlur={() => {
+										addressBlurTimeoutId = setTimeout(() => {
+											setIsAddressInputFocused(false);
+										}, 120);
+									}}
 								/>
 								<Show when={isSearchingAddress()}>
 									<p class="mt-1 text-xs text-muted-foreground">Searching addresses…</p>
 								</Show>
 							</TextField>
 
-							<Show when={addressSuggestions().length > 0}>
+							<Show when={isAddressInputFocused() && addressSuggestions().length > 0}>
 								<div class="absolute inset-x-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-md border bg-background shadow-md">
 									<For each={addressSuggestions()}>
 										{(suggestion) => (

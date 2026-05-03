@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/solid-router";
-import { createSignal, Show } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { apiFetch } from "~/api/request";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
@@ -12,13 +12,17 @@ export default function StaffPage() {
 
 	const [name, setName] = createSignal(state.staff?.name ?? "");
 	const [pin, setPin] = createSignal("");
-	const [pinConfirm, setPinConfirm] = createSignal("");
+	const [showPin, setShowPin] = createSignal(false);
 
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
+	let nameInputRef: HTMLInputElement | undefined;
+
+	onMount(() => {
+		nameInputRef?.focus();
+	});
 
 	const pinValid = () => pin().length === 4 && /^\d{4}$/.test(pin());
-	const pinsMatch = () => pin() === pinConfirm();
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
@@ -28,12 +32,8 @@ export default function StaffPage() {
 			setError("Name is required.");
 			return;
 		}
-		if (!pinValid()) {
+		if (pin().length > 0 && !pinValid()) {
 			setError("PIN must be exactly 4 digits.");
-			return;
-		}
-		if (!pinsMatch()) {
-			setError("PINs do not match.");
 			return;
 		}
 
@@ -65,21 +65,22 @@ export default function StaffPage() {
 				setStaff({ id: staffId, name: staffRes.data.name });
 			}
 
-			// Set PIN credential
-			const credRes = await apiFetch<{
-				data: { error?: string; message?: string };
-				status: number;
-			}>(`/api/staff/${staffId}/credentials`, {
-				method: "POST",
-				body: JSON.stringify({
-					credential_type: "pin",
-					secret: pin(),
-				}),
-			});
+			if (pin()) {
+				const credRes = await apiFetch<{
+					data: { error?: string; message?: string };
+					status: number;
+				}>(`/api/staff/${staffId}/credentials`, {
+					method: "POST",
+					body: JSON.stringify({
+						credential_type: "pin",
+						secret: pin(),
+					}),
+				});
 
-			if (credRes.status !== 200 && credRes.status !== 201 && credRes.status !== 204) {
-				setError(credRes.data?.error ?? credRes.data?.message ?? "Failed to set PIN");
-				return;
+				if (credRes.status !== 200 && credRes.status !== 201 && credRes.status !== 204) {
+					setError(credRes.data?.error ?? credRes.data?.message ?? "Failed to set PIN");
+					return;
+				}
 			}
 
 			navigate({ to: "/setup/tax-rates" });
@@ -101,35 +102,41 @@ export default function StaffPage() {
 					<div class="space-y-4">
 						<TextField value={name()} onChange={(v) => setName(v)}>
 							<TextFieldLabel>Full Name</TextFieldLabel>
-							<TextFieldInput placeholder="Ola Nordmann" required />
+							<TextFieldInput
+								ref={(el) => {
+									nameInputRef = el;
+								}}
+								placeholder="Ola Nordmann"
+								required
+								autocomplete="off"
+								name="staff-name"
+								data-1p-ignore="true"
+								data-lpignore="true"
+							/>
 						</TextField>
 
 						<TextField value={pin()} onChange={(v) => setPin(v.replaceAll(/\D/g, "").slice(0, 4))}>
-							<TextFieldLabel>4-Digit PIN</TextFieldLabel>
+							<div class="flex items-center justify-between">
+								<TextFieldLabel>4-Digit PIN (optional)</TextFieldLabel>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									tabIndex={-1}
+									onClick={() => setShowPin((v) => !v)}
+								>
+									{showPin() ? "Hide" : "Reveal"}
+								</Button>
+							</div>
 							<TextFieldInput
-								type="password"
+								type={showPin() ? "text" : "password"}
 								placeholder="****"
 								inputMode="numeric"
 								maxLength={4}
-								required
+								autocomplete="off"
+								data-1p-ignore="true"
+								data-lpignore="true"
 							/>
-						</TextField>
-
-						<TextField
-							value={pinConfirm()}
-							onChange={(v) => setPinConfirm(v.replaceAll(/\D/g, "").slice(0, 4))}
-						>
-							<TextFieldLabel>Confirm PIN</TextFieldLabel>
-							<TextFieldInput
-								type="password"
-								placeholder="****"
-								inputMode="numeric"
-								maxLength={4}
-								required
-							/>
-							<Show when={pinConfirm() && !pinsMatch()}>
-								<p class="mt-1 text-xs text-destructive">PINs do not match</p>
-							</Show>
 						</TextField>
 					</div>
 				</div>
@@ -146,9 +153,21 @@ export default function StaffPage() {
 					>
 						Back
 					</Button>
-					<Button type="submit" disabled={isSubmitting() || !name() || !pinValid() || !pinsMatch()}>
-						{isSubmitting() ? "Creating..." : "Next"}
-					</Button>
+					<div class="flex items-center gap-2">
+						<Button
+							type="button"
+							variant="ghost"
+							onClick={() => navigate({ to: "/setup/tax-rates" })}
+						>
+							Skip
+						</Button>
+						<Button
+							type="submit"
+							disabled={isSubmitting() || !name() || (pin().length > 0 && !pinValid())}
+						>
+							{isSubmitting() ? "Creating..." : "Next"}
+						</Button>
+					</div>
 				</div>
 			</form>
 		</WizardLayout>

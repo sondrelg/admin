@@ -5,33 +5,73 @@ import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { authenticatePasskey, isWebAuthnSupported } from "~/lib/webauthn";
 
+type LoginStep = "email" | "auth";
+
 export default function LoginPage() {
 	const navigate = useNavigate();
 
+	const [step, setStep] = createSignal<LoginStep>("email");
 	const [email, setEmail] = createSignal("");
 	const [password, setPassword] = createSignal("");
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [isPasskeyLoading, setIsPasskeyLoading] = createSignal(false);
+	const [passkeyDeclined, setPasskeyDeclined] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
 
-	const handlePasskeyLogin = async () => {
+	const isBusy = () => isSubmitting() || isPasskeyLoading();
+
+	const tryDirectPasskeyLogin = async (): Promise<boolean> => {
+		if (!isWebAuthnSupported() || passkeyDeclined()) return false;
+
+		setIsPasskeyLoading(true);
+		try {
+			const { data: startData } = await passkeyLoginStart({
+				body: { email: email().trim() },
+			});
+			if (!startData) return false;
+
+			const credential = await authenticatePasskey(startData as unknown as Record<string, unknown>);
+			const { data: finishData } = await passkeyLoginFinish({ body: credential });
+			if (!finishData) return false;
+
+			navigate({ to: "/" });
+			return true;
+		} catch (err) {
+			if (err instanceof Error && err.name === "NotAllowedError") {
+				setPasskeyDeclined(true);
+			}
+			return false;
+		} finally {
+			setIsPasskeyLoading(false);
+		}
+	};
+
+	const handleContinue = async (e: Event) => {
+		e.preventDefault();
 		setError(null);
 
 		if (!email().trim()) {
-			setError("Enter your email first, then use passkey sign-in.");
+			setError("Email is required.");
 			return;
 		}
 
+		const didPasskeyLogin = await tryDirectPasskeyLogin();
+		if (!didPasskeyLogin) {
+			setStep("auth");
+		}
+	};
+
+	const handlePasskeyLogin = async () => {
+		setError(null);
 		setIsPasskeyLoading(true);
 
 		try {
-			const { data: startData, error: startError } = await passkeyLoginStart({
-				body: { email: email() },
+			const { data: startData } = await passkeyLoginStart({
+				body: { email: email().trim() },
 			});
 
-			if (startError) {
-				setError("No passkeys registered for this account.");
-				setIsPasskeyLoading(false);
+			if (!startData) {
+				setError("Could not sign in. Check your details and try again.");
 				return;
 			}
 
@@ -44,27 +84,20 @@ export default function LoginPage() {
 			if (finishData) {
 				navigate({ to: "/" });
 			} else {
-				setError("Passkey authentication failed.");
+				setError("Could not sign in. Check your details and try again.");
 			}
 		} catch (err) {
 			if (err instanceof Error && err.name === "NotAllowedError") {
 				setError("Passkey authentication was cancelled.");
 			} else {
-				setError(err instanceof Error ? err.message : "Passkey authentication failed.");
+				setError("Could not sign in. Check your details and try again.");
 			}
+		} finally {
+			setIsPasskeyLoading(false);
 		}
-
-		setIsPasskeyLoading(false);
 	};
 
-	const handleSubmit = async (e: Event) => {
-		e.preventDefault();
-		setError(null);
-
-		if (!email().trim()) {
-			setError("Email is required.");
-			return;
-		}
+	const handlePasswordSignIn = async () => {
 		if (!password()) {
 			setError("Password is required.");
 			return;
@@ -73,19 +106,31 @@ export default function LoginPage() {
 		setIsSubmitting(true);
 		try {
 			const { data } = await signIn({
-				body: { email: email(), password: password() },
+				body: { email: email().trim(), password: password() },
 			});
 
 			if (data) {
 				navigate({ to: "/" });
 			} else {
-				setError("Invalid email or password");
+				setError("Could not sign in. Check your details and try again.");
 			}
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "An unexpected error occurred");
+		} catch {
+			setError("Could not sign in. Check your details and try again.");
 		} finally {
 			setIsSubmitting(false);
 		}
+	};
+
+	const handleFormSubmit = async (e: Event) => {
+		e.preventDefault();
+		setError(null);
+
+		if (step() === "email") {
+			await handleContinue(e);
+			return;
+		}
+
+		await handlePasswordSignIn();
 	};
 
 	return (
@@ -113,46 +158,74 @@ export default function LoginPage() {
 				</div>
 
 				<div class="rounded-lg border bg-card p-6 shadow-sm">
-					<form onSubmit={handleSubmit} class="space-y-4">
+					<form onSubmit={handleFormSubmit} class="space-y-4">
 						<TextField value={email()} onChange={setEmail}>
 							<TextFieldLabel>Email</TextFieldLabel>
 							<TextFieldInput
 								type="email"
 								placeholder="ola@example.com"
 								required
-								autocomplete="username"
+								autocomplete={step() === "email" ? "username webauthn" : "username"}
+								disabled={step() === "auth"}
 							/>
 						</TextField>
 
-						<div class="space-y-1.5">
-							<TextField value={password()} onChange={setPassword}>
-								<TextFieldLabel>Password</TextFieldLabel>
-								<TextFieldInput
-									type="password"
-									placeholder="Enter your password"
-									autocomplete="current-password"
-								/>
-							</TextField>
-							<div class="text-right">
-								<Link
-									to="/forgot-password"
-									class="text-xs text-muted-foreground hover:text-primary"
-								>
-									Forgot password?
-								</Link>
+						<Show when={step() === "auth"}>
+							<div class="space-y-1.5">
+								<TextField value={password()} onChange={setPassword}>
+									<TextFieldLabel>Password</TextFieldLabel>
+									<TextFieldInput
+										type="password"
+										placeholder="Enter your password"
+										autocomplete="current-password"
+									/>
+								</TextField>
+								<div class="text-right">
+									<Link
+										to="/forgot-password"
+										class="text-xs text-muted-foreground hover:text-primary"
+									>
+										Forgot password?
+									</Link>
+								</div>
 							</div>
-						</div>
+						</Show>
 
 						<Show when={error()}>
 							<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error()}</div>
 						</Show>
 
-						<Button type="submit" class="w-full" disabled={isSubmitting() || isPasskeyLoading()}>
-							{isSubmitting() ? "Signing in..." : "Sign In"}
-						</Button>
+						<Show
+							when={step() === "email"}
+							fallback={
+								<div class="space-y-3">
+									<Button type="submit" class="w-full" disabled={isBusy()}>
+										{isSubmitting() ? "Signing in..." : "Sign In"}
+									</Button>
+									<Button
+										type="button"
+										variant="ghost"
+										class="w-full"
+										disabled={isBusy()}
+										onClick={() => {
+											setStep("email");
+											setPassword("");
+											setError(null);
+											setPasskeyDeclined(false);
+										}}
+									>
+										Use a different email
+									</Button>
+								</div>
+							}
+						>
+							<Button type="submit" class="w-full" disabled={isBusy()}>
+								Continue
+							</Button>
+						</Show>
 					</form>
 
-					<Show when={isWebAuthnSupported()}>
+					<Show when={step() === "auth" && isWebAuthnSupported()}>
 						<div class="relative my-4">
 							<div class="absolute inset-0 flex items-center">
 								<span class="w-full border-t" />
@@ -165,7 +238,7 @@ export default function LoginPage() {
 							type="button"
 							variant="outline"
 							class="w-full"
-							disabled={isPasskeyLoading() || isSubmitting()}
+							disabled={isBusy()}
 							onClick={handlePasskeyLogin}
 						>
 							<svg

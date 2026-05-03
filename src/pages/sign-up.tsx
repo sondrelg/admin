@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/solid-router";
-import { createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { signUp } from "~/api/generated/sdk.gen";
+import { getProblemDetailMessage } from "~/api/problem";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
@@ -12,6 +13,16 @@ export default function SignUpPage() {
 	const [password, setPassword] = createSignal("");
 	const [isSubmitting, setIsSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string | null>(null);
+	let nameInputRef: HTMLInputElement | undefined;
+
+	onMount(() => {
+		const isDesktop =
+			typeof window !== "undefined" &&
+			window.matchMedia("(pointer: fine) and (min-width: 768px)").matches;
+		if (isDesktop) {
+			nameInputRef?.focus();
+		}
+	});
 
 	const canSubmit = createMemo(() => !!name().trim() && !!email().trim() && !!password());
 
@@ -26,7 +37,11 @@ export default function SignUpPage() {
 
 		setIsSubmitting(true);
 		try {
-			const { data, response } = await signUp({
+			const {
+				data,
+				error: apiError,
+				response,
+			} = await signUp({
 				body: { email: email().trim(), password: password(), name: name().trim() },
 			});
 
@@ -35,7 +50,10 @@ export default function SignUpPage() {
 				return;
 			}
 
-			if (response?.status === 409) {
+			const problemMessage = getProblemDetailMessage(apiError);
+			if (problemMessage) {
+				setError(problemMessage);
+			} else if (response?.status === 409) {
 				setError("An account with this email already exists.");
 			} else if (response?.status === 400) {
 				setError("Please check your details and try again.");
@@ -43,15 +61,18 @@ export default function SignUpPage() {
 				setError("Sign up failed. Please try again.");
 			}
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "An unexpected error occurred");
+			setError(
+				getProblemDetailMessage(err) ??
+					(err instanceof Error ? err.message : "An unexpected error occurred"),
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
 	return (
-		<div class="flex min-h-screen items-center justify-center p-4">
-			<div class="w-full max-w-sm space-y-6">
+		<div class="flex min-h-dvh items-start justify-center p-4 pt-8 md:min-h-screen md:items-center">
+			<div class="w-full max-w-sm space-y-5 pb-[max(1rem,env(safe-area-inset-bottom))] md:space-y-6">
 				<div class="space-y-2 text-center">
 					<div class="mx-auto flex size-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm">
 						<svg
@@ -70,14 +91,22 @@ export default function SignUpPage() {
 						</svg>
 					</div>
 					<h1 class="text-2xl font-bold">Create your account</h1>
-					<p class="text-muted-foreground">Create your account to start setup</p>
+					<p class="text-muted-foreground">No verification is necessary to get started</p>
 				</div>
 
-				<div class="rounded-lg border bg-card p-6 shadow-sm">
+				<div class="rounded-lg border bg-card p-4 shadow-sm md:p-6">
 					<form onSubmit={handleSubmit} class="space-y-4">
 						<TextField value={name()} onChange={setName}>
 							<TextFieldLabel>Full Name</TextFieldLabel>
-							<TextFieldInput placeholder="Ola Nordmann" required autocomplete="name" />
+							<TextFieldInput
+								ref={(el) => {
+									nameInputRef = el;
+								}}
+								placeholder="Ola Nordmann"
+								required
+								autocomplete="name"
+								enterkeyhint="next"
+							/>
 						</TextField>
 
 						<TextField value={email()} onChange={setEmail}>
@@ -87,6 +116,10 @@ export default function SignUpPage() {
 								placeholder="ola@example.com"
 								required
 								autocomplete="email"
+								autocapitalize="none"
+								autocorrect="off"
+								inputMode="email"
+								enterkeyhint="next"
 							/>
 						</TextField>
 
@@ -97,9 +130,10 @@ export default function SignUpPage() {
 								placeholder="Create a password"
 								required
 								autocomplete="new-password"
+								enterkeyhint="go"
 							/>
 							<p class="mt-1 text-xs text-muted-foreground">
-								We'll validate password rules after submit.
+								The password must be at least 8 characters.
 							</p>
 						</TextField>
 
@@ -108,7 +142,7 @@ export default function SignUpPage() {
 						</Show>
 
 						<Button type="submit" class="w-full" disabled={isSubmitting() || !canSubmit()}>
-							{isSubmitting() ? "Creating account..." : "Sign Up"}
+							{isSubmitting() ? "Creating account..." : "Continue"}
 						</Button>
 					</form>
 				</div>

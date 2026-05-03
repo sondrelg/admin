@@ -52,7 +52,6 @@ export type UpdateTenant = {
     is_active?: boolean | null;
     is_test?: boolean | null;
     name?: string | null;
-    slug?: string | null;
 };
 
 export type UpdateTaxRate = {
@@ -171,7 +170,6 @@ export type TenantResponse = {
     is_active: boolean;
     is_test: boolean;
     name: string;
-    slug: string;
 };
 
 export type TaxRateResponse = {
@@ -245,13 +243,13 @@ export type StaffExport = {
     tab_count: number;
 };
 
-export type SignUp = {
+export type SignUpRequest = {
     email: string;
     name: string;
     password: string;
 };
 
-export type SignIn = {
+export type SignInRequest = {
     email: string;
     password: string;
 };
@@ -476,7 +474,6 @@ export type CredentialSummary = {
 export type CreateTenant = {
     is_test?: boolean;
     name: string;
-    slug: string;
 };
 
 export type CreateTaxRate = {
@@ -1145,7 +1142,7 @@ export type ResetPasswordResponses = {
 };
 
 export type SignInData = {
-    body: SignIn;
+    body: SignInRequest;
     path?: never;
     query?: never;
     url: '/api/auth/sign-in';
@@ -1191,7 +1188,7 @@ export type SignOutResponses = {
 export type SignOutResponse = SignOutResponses[keyof SignOutResponses];
 
 export type SignUpData = {
-    body: SignUp;
+    body: SignUpRequest;
     path?: never;
     query?: never;
     url: '/api/auth/sign-up';
@@ -1206,6 +1203,10 @@ export type SignUpErrors = {
      * Email already exists
      */
     409: unknown;
+    /**
+     * Too many sign-up attempts
+     */
+    429: unknown;
 };
 
 export type SignUpResponses = {
