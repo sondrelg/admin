@@ -8,9 +8,14 @@ import {
 	useContext,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { setTenantId } from "~/api/client";
+import { setCompanyId, setTenantId } from "~/api/client";
 
 export interface WizardTenant {
+	id: string;
+	name: string;
+}
+
+export interface WizardCompany {
 	id: string;
 	name: string;
 }
@@ -28,7 +33,7 @@ export interface WizardStaff {
 export interface WizardTaxRate {
 	id: string;
 	name: string;
-	eatInRateBps: number;
+	rateBps: number;
 	takeAwayRateBps: number;
 }
 
@@ -47,6 +52,7 @@ export interface SetupBusinessDraft {
 
 export interface WizardState {
 	tenant: WizardTenant | null;
+	company: WizardCompany | null;
 	location: WizardLocation | null;
 	staff: WizardStaff | null;
 	taxRates: WizardTaxRate[];
@@ -83,6 +89,7 @@ function loadState(): WizardState {
 function defaultState(): WizardState {
 	return {
 		tenant: null,
+		company: null,
 		location: null,
 		staff: null,
 		taxRates: [],
@@ -102,6 +109,7 @@ function defaultState(): WizardState {
 interface WizardContextValue {
 	state: WizardState;
 	setTenant: (tenant: WizardTenant) => void;
+	setCompany: (company: WizardCompany) => void;
 	setLocation: (location: WizardLocation) => void;
 	setStaff: (staff: WizardStaff) => void;
 	setTaxRates: (rates: WizardTaxRate[]) => void;
@@ -119,6 +127,9 @@ export function WizardProvider(props: { children: JSX.Element }) {
 	const initial = loadState();
 	if (initial.tenant) {
 		setTenantId(initial.tenant.id);
+	}
+	if (initial.company) {
+		setCompanyId(initial.company.id);
 	}
 	const [state, setState] = createStore<WizardState>(initial);
 	const [isComplete, setIsComplete] = createSignal(false);
@@ -139,6 +150,10 @@ export function WizardProvider(props: { children: JSX.Element }) {
 			setState("tenant", tenant);
 			setTenantId(tenant.id);
 		},
+		setCompany: (company) => {
+			setState("company", company);
+			setCompanyId(company.id);
+		},
 		setLocation: (location) => setState("location", location),
 		setStaff: (staff) => setState("staff", staff),
 		setTaxRates: (rates) => setState("taxRates", rates),
@@ -150,6 +165,7 @@ export function WizardProvider(props: { children: JSX.Element }) {
 			localStorage.removeItem(STORAGE_KEY);
 			setState(reconcile(defaultState()));
 			setTenantId(null);
+			setCompanyId(null);
 		},
 		isComplete,
 	};

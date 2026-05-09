@@ -1,5 +1,7 @@
 import {
 	generateUuidV4,
+	getCompanyHeaderName,
+	getCompanyId,
 	getIdempotencyHeaderName,
 	getTenantHeaderName,
 	getTenantId,
@@ -19,6 +21,11 @@ export function setupApiClient() {
 		const tenantId = getTenantId();
 		if (tenantId) {
 			headers.set(getTenantHeaderName(), tenantId);
+		}
+
+		const companyId = getCompanyId();
+		if (companyId) {
+			headers.set(getCompanyHeaderName(), companyId);
 		}
 
 		if (

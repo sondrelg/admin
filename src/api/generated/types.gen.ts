@@ -24,12 +24,14 @@ export type UserSummary = {
 
 export type UserProfile = {
     created_at: string;
-    email: string;
+    email: EmailAddress;
     email_verified: boolean;
     id: string;
     is_active: boolean;
     name: string;
 };
+
+export type EmailAddress = string;
 
 export type UserPasskeySummary = {
     created_at: string;
@@ -81,11 +83,24 @@ export type UpdateStaff = {
 
 export type StaffRole = 'Cashier' | 'ShiftLead' | 'Manager' | 'Admin';
 
+export type UpdateSettlementStatus = {
+    status: string;
+};
+
 export type UpdateRegister = {
     is_active?: boolean | null;
     location_id?: string | null;
     name?: string | null;
     register_id?: string | null;
+};
+
+export type UpdatePlan = {
+    device_price_minor_unit?: number | null;
+    is_active?: boolean | null;
+    minimum_spend_minor_unit?: number | null;
+    name?: string | null;
+    staff_price_minor_unit?: number | null;
+    transaction_fee_bps?: number | null;
 };
 
 export type UpdateModifierGroup = {
@@ -164,12 +179,23 @@ export type UpdateBundleSlot = {
     name?: string | null;
 };
 
+export type UpdateBranding = {
+    app_name?: string | null;
+    custom_domain?: string | null;
+    logo_url?: string | null;
+    primary_color?: string | null;
+    support_email?: string | null;
+    support_url?: string | null;
+};
+
 export type TenantResponse = {
     created_at: string;
     id: string;
     is_active: boolean;
     is_test: boolean;
     name: string;
+    plan_id?: string | null;
+    reseller_id?: string | null;
 };
 
 export type TaxRateResponse = {
@@ -254,6 +280,39 @@ export type SignInRequest = {
     password: string;
 };
 
+export type SettlementResponse = {
+    agreement_id: string;
+    created_at: string;
+    currency: string;
+    id: string;
+    period_end: string;
+    period_start: string;
+    reseller_id: string;
+    reseller_subscription_share: number;
+    reseller_total_earned: number;
+    reseller_transaction_share: number;
+    revenue_share_bps: number;
+    status: string;
+    subscription_share_bps: number;
+    tenant_count: number;
+    total_platform_fees: number;
+    total_subscription_fees: number;
+    total_transaction_volume: number;
+    transaction_count: number;
+};
+
+export type SettlementLineResponse = {
+    id: string;
+    platform_fee: number;
+    reseller_share: number;
+    reseller_subscription_share: number;
+    settlement_id: string;
+    subscription_fee: number;
+    tenant_id: string;
+    transaction_count: number;
+    transaction_volume: number;
+};
+
 export type SetModifierGroups = {
     groups: Array<ModifierGroupAssignmentInput>;
 };
@@ -306,6 +365,37 @@ export type ResetPasswordRequest = {
     token: string;
 };
 
+export type ResellerUserResponse = {
+    created_at: string;
+    reseller_id: string;
+    role: string;
+    user_id: string;
+};
+
+export type ResellerTenantResponse = {
+    created_at: string;
+    id: string;
+    is_active: boolean;
+    is_test: boolean;
+    name: string;
+    plan_name?: string | null;
+};
+
+export type ResellerResponse = {
+    app_name?: string | null;
+    created_at: string;
+    custom_domain?: string | null;
+    id: string;
+    is_active: boolean;
+    logo_url?: string | null;
+    name: string;
+    primary_color?: string | null;
+    slug: string;
+    support_email?: string | null;
+    support_url?: string | null;
+    updated_at: string;
+};
+
 export type RenamePasskeyRequest = {
     name: string;
 };
@@ -322,6 +412,25 @@ export type RegisterResponse = {
 
 export type RegisterPasskeyStart = {
     name: string;
+};
+
+export type ProvisionTenant = {
+    name: string;
+};
+
+export type PlanResponse = {
+    created_at: string;
+    device_price_minor_unit: number;
+    id: string;
+    is_active: boolean;
+    is_public: boolean;
+    minimum_spend_minor_unit: number;
+    name: string;
+    slug: string;
+    staff_price_minor_unit: number;
+    tenant_id?: string | null;
+    transaction_fee_bps: number;
+    updated_at: string;
 };
 
 export type ModifierResponse = {
@@ -517,6 +626,20 @@ export type CreateRegister = {
     register_id: string;
 };
 
+export type CreatePlan = {
+    device_price_minor_unit: number;
+    is_public?: boolean;
+    minimum_spend_minor_unit?: number;
+    name: string;
+    slug: string;
+    staff_price_minor_unit: number;
+    /**
+     * Required when `is_public` is false — binds this plan 1:1 to a tenant.
+     */
+    tenant_id?: string | null;
+    transaction_fee_bps: number;
+};
+
 export type CreateModifierGroup = {
     display_order?: number | null;
     max_selections?: number | null;
@@ -581,8 +704,22 @@ export type CreateApiToken = {
     name: string;
 };
 
+export type CreateAgreement = {
+    effective_from: string;
+    effective_until?: string | null;
+    reseller_id: string;
+    revenue_share_bps: number;
+    subscription_share_bps: number;
+};
+
 export type CreateActivationCode = {
     device_name?: string;
+};
+
+export type ComputeSettlement = {
+    period_end: string;
+    period_start: string;
+    reseller_id: string;
 };
 
 export type CompleteStockCount = {
@@ -629,8 +766,20 @@ export type BundleSlotOptionResponse = {
     tenant_id: string;
 };
 
+export type BrandingResponse = {
+    app_name?: string | null;
+    logo_url?: string | null;
+    primary_color?: string | null;
+    support_email?: string | null;
+    support_url?: string | null;
+};
+
 export type AuthResponse = {
     user: UserSummary;
+};
+
+export type AssignPlan = {
+    plan_id?: string | null;
 };
 
 export type ApiTokenResponse = {
@@ -671,6 +820,16 @@ export type AllergenResponse = {
     name: string;
 };
 
+export type AgreementResponse = {
+    created_at: string;
+    effective_from: string;
+    effective_until?: string | null;
+    id: string;
+    reseller_id: string;
+    revenue_share_bps: number;
+    subscription_share_bps: number;
+};
+
 export type AddressSuggestionResponse = {
     address_name?: string | null;
     address_text: string;
@@ -687,6 +846,11 @@ export type AddressSuggestionResponse = {
 export type AddressSearchResponse = {
     addresses: Array<AddressSuggestionResponse>;
     total_hits?: number | null;
+};
+
+export type AddResellerUser = {
+    role?: string;
+    user_id: string;
 };
 
 /**
@@ -726,6 +890,109 @@ export type SearchAddressesResponses = {
 };
 
 export type SearchAddressesResponse = SearchAddressesResponses[keyof SearchAddressesResponses];
+
+export type CreateAgreementData = {
+    body: CreateAgreement;
+    path?: never;
+    query?: never;
+    url: '/api/admin/reseller-agreements';
+};
+
+export type CreateAgreementErrors = {
+    /**
+     * Overlapping agreement exists
+     */
+    409: unknown;
+};
+
+export type CreateAgreementResponses = {
+    /**
+     * Agreement created
+     */
+    201: AgreementResponse;
+};
+
+export type CreateAgreementResponse = CreateAgreementResponses[keyof CreateAgreementResponses];
+
+export type ListAgreementsData = {
+    body?: never;
+    path: {
+        /**
+         * Reseller ID
+         */
+        reseller_id: string;
+    };
+    query?: never;
+    url: '/api/admin/resellers/{reseller_id}/agreements';
+};
+
+export type ListAgreementsResponses = {
+    /**
+     * List agreements for reseller
+     */
+    200: Array<AgreementResponse>;
+};
+
+export type ListAgreementsResponse = ListAgreementsResponses[keyof ListAgreementsResponses];
+
+export type ComputeSettlementHandlerData = {
+    body: ComputeSettlement;
+    path?: never;
+    query?: never;
+    url: '/api/admin/settlements/compute';
+};
+
+export type ComputeSettlementHandlerErrors = {
+    /**
+     * No active agreement for the period
+     */
+    404: unknown;
+    /**
+     * Settlement already exists for this period
+     */
+    409: unknown;
+};
+
+export type ComputeSettlementHandlerResponses = {
+    /**
+     * Settlement computed and stored
+     */
+    201: SettlementResponse;
+};
+
+export type ComputeSettlementHandlerResponse = ComputeSettlementHandlerResponses[keyof ComputeSettlementHandlerResponses];
+
+export type UpdateSettlementStatusData = {
+    body: UpdateSettlementStatus;
+    path: {
+        /**
+         * Settlement ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/admin/settlements/{id}/status';
+};
+
+export type UpdateSettlementStatusErrors = {
+    /**
+     * Invalid status transition
+     */
+    400: unknown;
+    /**
+     * Settlement not found
+     */
+    404: unknown;
+};
+
+export type UpdateSettlementStatusResponses = {
+    /**
+     * Settlement status updated
+     */
+    200: SettlementResponse;
+};
+
+export type UpdateSettlementStatusResponse = UpdateSettlementStatusResponses[keyof UpdateSettlementStatusResponses];
 
 export type ListAllergensData = {
     body?: never;
@@ -2433,6 +2700,94 @@ export type UpdateModifierResponses = {
 
 export type UpdateModifierResponse = UpdateModifierResponses[keyof UpdateModifierResponses];
 
+export type ListPlansData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/plans';
+};
+
+export type ListPlansResponses = {
+    /**
+     * List all plans
+     */
+    200: Array<PlanResponse>;
+};
+
+export type ListPlansResponse = ListPlansResponses[keyof ListPlansResponses];
+
+export type CreatePlanData = {
+    body: CreatePlan;
+    path?: never;
+    query?: never;
+    url: '/api/plans';
+};
+
+export type CreatePlanResponses = {
+    /**
+     * Plan created
+     */
+    201: PlanResponse;
+};
+
+export type CreatePlanResponse = CreatePlanResponses[keyof CreatePlanResponses];
+
+export type GetPlanData = {
+    body?: never;
+    path: {
+        /**
+         * Plan ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/plans/{id}';
+};
+
+export type GetPlanErrors = {
+    /**
+     * Plan not found
+     */
+    404: unknown;
+};
+
+export type GetPlanResponses = {
+    /**
+     * Plan found
+     */
+    200: PlanResponse;
+};
+
+export type GetPlanResponse = GetPlanResponses[keyof GetPlanResponses];
+
+export type UpdatePlanData = {
+    body: UpdatePlan;
+    path: {
+        /**
+         * Plan ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/plans/{id}';
+};
+
+export type UpdatePlanErrors = {
+    /**
+     * Plan not found
+     */
+    404: unknown;
+};
+
+export type UpdatePlanResponses = {
+    /**
+     * Plan updated
+     */
+    200: PlanResponse;
+};
+
+export type UpdatePlanResponse = UpdatePlanResponses[keyof UpdatePlanResponses];
+
 export type ListRegistersData = {
     body?: never;
     path?: never;
@@ -2520,6 +2875,262 @@ export type UpdateRegisterResponses = {
 };
 
 export type UpdateRegisterResponse = UpdateRegisterResponses[keyof UpdateRegisterResponses];
+
+export type GetResellerAgreementData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/agreement';
+};
+
+export type GetResellerAgreementErrors = {
+    /**
+     * No active agreement
+     */
+    404: unknown;
+};
+
+export type GetResellerAgreementResponses = {
+    /**
+     * Current active agreement
+     */
+    200: AgreementResponse;
+};
+
+export type GetResellerAgreementResponse = GetResellerAgreementResponses[keyof GetResellerAgreementResponses];
+
+export type GetBrandingData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/branding';
+};
+
+export type GetBrandingResponses = {
+    /**
+     * Current branding config
+     */
+    200: BrandingResponse;
+};
+
+export type GetBrandingResponse = GetBrandingResponses[keyof GetBrandingResponses];
+
+export type UpdateBrandingData = {
+    body: UpdateBranding;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/branding';
+};
+
+export type UpdateBrandingResponses = {
+    /**
+     * Branding updated
+     */
+    200: ResellerResponse;
+};
+
+export type UpdateBrandingResponse = UpdateBrandingResponses[keyof UpdateBrandingResponses];
+
+export type ListResellerPlansData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/plans';
+};
+
+export type ListResellerPlansResponses = {
+    /**
+     * Plans available to this reseller
+     */
+    200: Array<PlanResponse>;
+};
+
+export type ListResellerPlansResponse = ListResellerPlansResponses[keyof ListResellerPlansResponses];
+
+export type ListResellerSettlementsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/settlements';
+};
+
+export type ListResellerSettlementsResponses = {
+    /**
+     * Settlement history
+     */
+    200: Array<SettlementResponse>;
+};
+
+export type ListResellerSettlementsResponse = ListResellerSettlementsResponses[keyof ListResellerSettlementsResponses];
+
+export type GetResellerSettlementData = {
+    body?: never;
+    path: {
+        /**
+         * Settlement ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/reseller/settlements/{id}';
+};
+
+export type GetResellerSettlementErrors = {
+    /**
+     * Settlement not found
+     */
+    404: unknown;
+};
+
+export type GetResellerSettlementResponses = {
+    /**
+     * Settlement detail
+     */
+    200: SettlementResponse;
+};
+
+export type GetResellerSettlementResponse = GetResellerSettlementResponses[keyof GetResellerSettlementResponses];
+
+export type GetResellerSettlementLinesData = {
+    body?: never;
+    path: {
+        /**
+         * Settlement ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/reseller/settlements/{id}/lines';
+};
+
+export type GetResellerSettlementLinesResponses = {
+    /**
+     * Per-tenant settlement line items
+     */
+    200: Array<SettlementLineResponse>;
+};
+
+export type GetResellerSettlementLinesResponse = GetResellerSettlementLinesResponses[keyof GetResellerSettlementLinesResponses];
+
+export type ListTenantsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/tenants';
+};
+
+export type ListTenantsResponses = {
+    /**
+     * List tenants under this reseller
+     */
+    200: Array<ResellerTenantResponse>;
+};
+
+export type ListTenantsResponse = ListTenantsResponses[keyof ListTenantsResponses];
+
+export type ProvisionTenantData = {
+    body: ProvisionTenant;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/tenants';
+};
+
+export type ProvisionTenantResponses = {
+    /**
+     * Tenant provisioned
+     */
+    201: ResellerTenantResponse;
+};
+
+export type ProvisionTenantResponse = ProvisionTenantResponses[keyof ProvisionTenantResponses];
+
+export type AssignResellerTenantPlanData = {
+    body: AssignPlan;
+    path: {
+        /**
+         * Tenant ID
+         */
+        tenant_id: string;
+    };
+    query?: never;
+    url: '/api/reseller/tenants/{tenant_id}/plan';
+};
+
+export type AssignResellerTenantPlanErrors = {
+    /**
+     * Tenant or plan not found
+     */
+    404: unknown;
+};
+
+export type AssignResellerTenantPlanResponses = {
+    /**
+     * Plan assigned to reseller tenant
+     */
+    204: void;
+};
+
+export type AssignResellerTenantPlanResponse = AssignResellerTenantPlanResponses[keyof AssignResellerTenantPlanResponses];
+
+export type ListUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/users';
+};
+
+export type ListUsersResponses = {
+    /**
+     * List reseller users
+     */
+    200: Array<ResellerUserResponse>;
+};
+
+export type ListUsersResponse = ListUsersResponses[keyof ListUsersResponses];
+
+export type AddUserData = {
+    body: AddResellerUser;
+    path?: never;
+    query?: never;
+    url: '/api/reseller/users';
+};
+
+export type AddUserResponses = {
+    /**
+     * User added to reseller
+     */
+    201: ResellerUserResponse;
+};
+
+export type AddUserResponse = AddUserResponses[keyof AddUserResponses];
+
+export type RemoveUserData = {
+    body?: never;
+    path: {
+        /**
+         * User ID to remove
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/reseller/users/{user_id}';
+};
+
+export type RemoveUserErrors = {
+    /**
+     * User not found in reseller
+     */
+    404: unknown;
+};
+
+export type RemoveUserResponses = {
+    /**
+     * User removed from reseller
+     */
+    204: void;
+};
+
+export type RemoveUserResponse = RemoveUserResponses[keyof RemoveUserResponses];
 
 export type ListStaffData = {
     body?: never;
@@ -3300,21 +3911,21 @@ export type ForwardTracesResponses = {
     200: unknown;
 };
 
-export type ListTenantsData = {
+export type ListTenants2Data = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/tenants';
 };
 
-export type ListTenantsResponses = {
+export type ListTenants2Responses = {
     /**
      * List all tenants
      */
     200: Array<TenantResponse>;
 };
 
-export type ListTenantsResponse = ListTenantsResponses[keyof ListTenantsResponses];
+export type ListTenants2Response = ListTenants2Responses[keyof ListTenants2Responses];
 
 export type CreateTenantData = {
     body: CreateTenant;
@@ -3394,3 +4005,31 @@ export type UpdateTenantResponses = {
 };
 
 export type UpdateTenantResponse = UpdateTenantResponses[keyof UpdateTenantResponses];
+
+export type AssignPlanData = {
+    body: AssignPlan;
+    path: {
+        /**
+         * Tenant ID
+         */
+        tenant_id: string;
+    };
+    query?: never;
+    url: '/api/tenants/{tenant_id}/plan';
+};
+
+export type AssignPlanErrors = {
+    /**
+     * Tenant or plan not found
+     */
+    404: unknown;
+};
+
+export type AssignPlanResponses = {
+    /**
+     * Plan assigned
+     */
+    204: void;
+};
+
+export type AssignPlanResponse = AssignPlanResponses[keyof AssignPlanResponses];

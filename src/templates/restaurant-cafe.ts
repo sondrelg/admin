@@ -1,6 +1,6 @@
 export interface TemplateTaxRate {
 	name: string;
-	eatInRateBps: number;
+	rateBps: number;
 	takeAwayRateBps: number;
 	isDefault: boolean;
 }
@@ -28,12 +28,12 @@ export const restaurantCafe: Template = {
 	taxRates: [
 		{
 			name: "Mat og alkoholfri drikke",
-			eatInRateBps: 2500,
+			rateBps: 2500,
 			takeAwayRateBps: 1500,
 			isDefault: false,
 		},
-		{ name: "Alkohol", eatInRateBps: 2500, takeAwayRateBps: 2500, isDefault: false },
-		{ name: "Generell", eatInRateBps: 2500, takeAwayRateBps: 2500, isDefault: true },
+		{ name: "Alkohol", rateBps: 2500, takeAwayRateBps: 2500, isDefault: false },
+		{ name: "Generell", rateBps: 2500, takeAwayRateBps: 2500, isDefault: true },
 	],
 	categories: [
 		{

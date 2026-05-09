@@ -18,6 +18,7 @@ import {
 } from "~/components/ui/dialog";
 import { CategoryManager } from "./category-manager";
 import { CreateItemDialog } from "./create-item-dialog";
+import { ImportFromCatalog } from "./import-from-catalog";
 import { ItemDetailSheet } from "./item-detail-sheet";
 import { ModifierGroupManager } from "./modifier-manager";
 import { SortableItem } from "./sortable-item";
@@ -30,6 +31,7 @@ export default function MenuPage() {
 	const [loading, setLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);
 	const [createOpen, setCreateOpen] = createSignal(false);
+	const [importOpen, setImportOpen] = createSignal(false);
 	const [togglingId, setTogglingId] = createSignal<string | null>(null);
 	const [selectedItem, setSelectedItem] = createSignal<MenuItem | null>(null);
 	const [categoriesExpanded, setCategoriesExpanded] = createSignal(false);
@@ -325,9 +327,14 @@ export default function MenuPage() {
 					<h2 class="text-2xl font-bold tracking-tight">Menu</h2>
 					<p class="mt-1 text-sm text-muted-foreground">Manage your menu items and categories.</p>
 				</div>
-				<Button type="button" onClick={() => setCreateOpen(true)}>
-					+ Add Item
-				</Button>
+				<div class="flex gap-2">
+					<Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
+						Import from Catalog
+					</Button>
+					<Button type="button" onClick={() => setCreateOpen(true)}>
+						+ Add Item
+					</Button>
+				</div>
 			</div>
 
 			{/* Categories management */}
@@ -643,6 +650,14 @@ export default function MenuPage() {
 				onOpenChange={setCreateOpen}
 				categories={categories()}
 				onCreated={handleCreated}
+			/>
+
+			<ImportFromCatalog
+				open={importOpen()}
+				onOpenChange={setImportOpen}
+				categories={categories()}
+				taxRates={taxRates()}
+				onImported={handleCreated}
 			/>
 
 			<ItemDetailSheet

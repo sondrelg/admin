@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AnonymizeMeData, AnonymizeMeErrors, AnonymizeMeResponses, AnonymizeStaffData, AnonymizeStaffErrors, AnonymizeStaffResponses, CancelStockCountData, CancelStockCountErrors, CancelStockCountResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CompleteStockCountData, CompleteStockCountErrors, CompleteStockCountResponses, CreateActivationCodeData, CreateActivationCodeResponses, CreateApiTokenData, CreateApiTokenErrors, CreateApiTokenResponses, CreateBundleSlotData, CreateBundleSlotResponses, CreateCategoryData, CreateCategoryResponses, CreateItemData, CreateItemResponses, CreateLocationData, CreateLocationResponses, CreateMenuData, CreateMenuResponses, CreateModifierData, CreateModifierGroupData, CreateModifierGroupResponses, CreateModifierResponses, CreateMovementData, CreateMovementResponses, CreateRegisterData, CreateRegisterResponses, CreateStaffData, CreateStaffResponses, CreateStockCountData, CreateStockCountResponses, CreateStockItemData, CreateStockItemResponses, CreateTaxRateData, CreateTaxRateResponses, CreateTenantData, CreateTenantErrors, CreateTenantResponses, DeactivateDeviceData, DeactivateDeviceErrors, DeactivateDeviceResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeleteBundleSlotData, DeleteBundleSlotErrors, DeleteBundleSlotResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteCountLineData, DeleteCountLineErrors, DeleteCountLineResponses, DeleteItemData, DeleteItemErrors, DeleteItemImageData, DeleteItemImageErrors, DeleteItemImageResponses, DeleteItemResponses, DeleteLocationOverrideData, DeleteLocationOverrideErrors, DeleteLocationOverrideResponses, DeleteMenuData, DeleteMenuErrors, DeleteMenuResponses, DeleteModifierData, DeleteModifierErrors, DeleteModifierGroupData, DeleteModifierGroupErrors, DeleteModifierGroupResponses, DeleteModifierResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeleteStockItemData, DeleteStockItemErrors, DeleteStockItemResponses, DeleteTaxRateData, DeleteTaxRateErrors, DeleteTaxRateResponses, ExportMeData, ExportMeErrors, ExportMeResponses, ExportStaffData, ExportStaffErrors, ExportStaffResponses, ForgotPasswordData, ForgotPasswordResponses, ForwardTracesData, ForwardTracesErrors, ForwardTracesResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetDeviceData, GetDeviceErrors, GetDeviceResponses, GetItemData, GetItemErrors, GetItemResponses, GetLocationData, GetLocationErrors, GetLocationResponses, GetMenuData, GetMenuErrors, GetMenuResponses, GetModifierGroupData, GetModifierGroupErrors, GetModifierGroupResponses, GetRegisterData, GetRegisterErrors, GetRegisterResponses, GetStaffData, GetStaffErrors, GetStaffResponses, GetStockCountData, GetStockCountErrors, GetStockCountResponses, GetStockItemData, GetStockItemErrors, GetStockItemResponses, GetTaxRateData, GetTaxRateErrors, GetTaxRateResponses, GetTenantData, GetTenantErrors, GetTenantResponses, ListAllergensData, ListAllergensResponses, ListApiTokensData, ListApiTokensResponses, ListBundleSlotOptionsData, ListBundleSlotOptionsResponses, ListBundleSlotsData, ListBundleSlotsResponses, ListCategoriesData, ListCategoriesResponses, ListCountLinesData, ListCountLinesResponses, ListCredentialsData, ListCredentialsResponses, ListDevicesData, ListDevicesResponses, ListItemAllergensData, ListItemAllergensResponses, ListItemImagesData, ListItemImagesResponses, ListItemModifierGroupsData, ListItemModifierGroupsResponses, ListItemsData, ListItemsResponses, ListLocationOverridesData, ListLocationOverridesResponses, ListLocationsData, ListLocationsResponses, ListMenuItemsData, ListMenuItemsResponses, ListMenusData, ListMenusResponses, ListModifierGroupsData, ListModifierGroupsResponses, ListModifiersData, ListModifiersResponses, ListMovementsData, ListMovementsResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListRegistersData, ListRegistersResponses, ListStaffData, ListStaffResponses, ListStockCountsData, ListStockCountsResponses, ListStockItemsData, ListStockItemsResponses, ListTaxRatesData, ListTaxRatesResponses, ListTenantsData, ListTenantsResponses, MeData, MeErrors, MeResponses, PasskeyLoginFinishData, PasskeyLoginFinishErrors, PasskeyLoginFinishResponses, PasskeyLoginStartData, PasskeyLoginStartErrors, PasskeyLoginStartResponses, PasskeyRegisterFinishData, PasskeyRegisterFinishErrors, PasskeyRegisterFinishResponses, PasskeyRegisterStartData, PasskeyRegisterStartErrors, PasskeyRegisterStartResponses, RemoveCredentialData, RemoveCredentialErrors, RemoveCredentialResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, RevokeApiTokenData, RevokeApiTokenErrors, RevokeApiTokenResponses, SearchAddressesData, SearchAddressesResponses, SetBundleSlotOptionsData, SetBundleSlotOptionsResponses, SetCredentialData, SetCredentialErrors, SetCredentialResponses, SetItemAllergensData, SetItemAllergensResponses, SetItemModifierGroupsData, SetItemModifierGroupsResponses, SetLocationOverrideData, SetLocationOverrideResponses, SetMenuItemsData, SetMenuItemsResponses, SignInData, SignInErrors, SignInResponses, SignOutData, SignOutErrors, SignOutResponses, SignUpData, SignUpErrors, SignUpResponses, UpdateBundleSlotData, UpdateBundleSlotErrors, UpdateBundleSlotResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateDeviceData, UpdateDeviceErrors, UpdateDeviceResponses, UpdateItemData, UpdateItemErrors, UpdateItemResponses, UpdateLocationData, UpdateLocationErrors, UpdateLocationResponses, UpdateMenuData, UpdateMenuErrors, UpdateMenuResponses, UpdateModifierData, UpdateModifierErrors, UpdateModifierGroupData, UpdateModifierGroupErrors, UpdateModifierGroupResponses, UpdateModifierResponses, UpdateRegisterData, UpdateRegisterErrors, UpdateRegisterResponses, UpdateStaffData, UpdateStaffErrors, UpdateStaffResponses, UpdateStockCountData, UpdateStockCountErrors, UpdateStockCountResponses, UpdateStockItemData, UpdateStockItemErrors, UpdateStockItemResponses, UpdateTaxRateData, UpdateTaxRateErrors, UpdateTaxRateResponses, UpdateTenantData, UpdateTenantErrors, UpdateTenantResponses, UploadItemImageData, UploadItemImageErrors, UploadItemImageResponses, UpsertCountLineData, UpsertCountLineResponses } from './types.gen';
+import type { AddUserData, AddUserResponses, AnonymizeMeData, AnonymizeMeErrors, AnonymizeMeResponses, AnonymizeStaffData, AnonymizeStaffErrors, AnonymizeStaffResponses, AssignPlanData, AssignPlanErrors, AssignPlanResponses, AssignResellerTenantPlanData, AssignResellerTenantPlanErrors, AssignResellerTenantPlanResponses, CancelStockCountData, CancelStockCountErrors, CancelStockCountResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CompleteStockCountData, CompleteStockCountErrors, CompleteStockCountResponses, ComputeSettlementHandlerData, ComputeSettlementHandlerErrors, ComputeSettlementHandlerResponses, CreateActivationCodeData, CreateActivationCodeResponses, CreateAgreementData, CreateAgreementErrors, CreateAgreementResponses, CreateApiTokenData, CreateApiTokenErrors, CreateApiTokenResponses, CreateBundleSlotData, CreateBundleSlotResponses, CreateCategoryData, CreateCategoryResponses, CreateItemData, CreateItemResponses, CreateLocationData, CreateLocationResponses, CreateMenuData, CreateMenuResponses, CreateModifierData, CreateModifierGroupData, CreateModifierGroupResponses, CreateModifierResponses, CreateMovementData, CreateMovementResponses, CreatePlanData, CreatePlanResponses, CreateRegisterData, CreateRegisterResponses, CreateStaffData, CreateStaffResponses, CreateStockCountData, CreateStockCountResponses, CreateStockItemData, CreateStockItemResponses, CreateTaxRateData, CreateTaxRateResponses, CreateTenantData, CreateTenantErrors, CreateTenantResponses, DeactivateDeviceData, DeactivateDeviceErrors, DeactivateDeviceResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeleteBundleSlotData, DeleteBundleSlotErrors, DeleteBundleSlotResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteCountLineData, DeleteCountLineErrors, DeleteCountLineResponses, DeleteItemData, DeleteItemErrors, DeleteItemImageData, DeleteItemImageErrors, DeleteItemImageResponses, DeleteItemResponses, DeleteLocationOverrideData, DeleteLocationOverrideErrors, DeleteLocationOverrideResponses, DeleteMenuData, DeleteMenuErrors, DeleteMenuResponses, DeleteModifierData, DeleteModifierErrors, DeleteModifierGroupData, DeleteModifierGroupErrors, DeleteModifierGroupResponses, DeleteModifierResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeleteStockItemData, DeleteStockItemErrors, DeleteStockItemResponses, DeleteTaxRateData, DeleteTaxRateErrors, DeleteTaxRateResponses, ExportMeData, ExportMeErrors, ExportMeResponses, ExportStaffData, ExportStaffErrors, ExportStaffResponses, ForgotPasswordData, ForgotPasswordResponses, ForwardTracesData, ForwardTracesErrors, ForwardTracesResponses, GetBrandingData, GetBrandingResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetDeviceData, GetDeviceErrors, GetDeviceResponses, GetItemData, GetItemErrors, GetItemResponses, GetLocationData, GetLocationErrors, GetLocationResponses, GetMenuData, GetMenuErrors, GetMenuResponses, GetModifierGroupData, GetModifierGroupErrors, GetModifierGroupResponses, GetPlanData, GetPlanErrors, GetPlanResponses, GetRegisterData, GetRegisterErrors, GetRegisterResponses, GetResellerAgreementData, GetResellerAgreementErrors, GetResellerAgreementResponses, GetResellerSettlementData, GetResellerSettlementErrors, GetResellerSettlementLinesData, GetResellerSettlementLinesResponses, GetResellerSettlementResponses, GetStaffData, GetStaffErrors, GetStaffResponses, GetStockCountData, GetStockCountErrors, GetStockCountResponses, GetStockItemData, GetStockItemErrors, GetStockItemResponses, GetTaxRateData, GetTaxRateErrors, GetTaxRateResponses, GetTenantData, GetTenantErrors, GetTenantResponses, ListAgreementsData, ListAgreementsResponses, ListAllergensData, ListAllergensResponses, ListApiTokensData, ListApiTokensResponses, ListBundleSlotOptionsData, ListBundleSlotOptionsResponses, ListBundleSlotsData, ListBundleSlotsResponses, ListCategoriesData, ListCategoriesResponses, ListCountLinesData, ListCountLinesResponses, ListCredentialsData, ListCredentialsResponses, ListDevicesData, ListDevicesResponses, ListItemAllergensData, ListItemAllergensResponses, ListItemImagesData, ListItemImagesResponses, ListItemModifierGroupsData, ListItemModifierGroupsResponses, ListItemsData, ListItemsResponses, ListLocationOverridesData, ListLocationOverridesResponses, ListLocationsData, ListLocationsResponses, ListMenuItemsData, ListMenuItemsResponses, ListMenusData, ListMenusResponses, ListModifierGroupsData, ListModifierGroupsResponses, ListModifiersData, ListModifiersResponses, ListMovementsData, ListMovementsResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListPlansData, ListPlansResponses, ListRegistersData, ListRegistersResponses, ListResellerPlansData, ListResellerPlansResponses, ListResellerSettlementsData, ListResellerSettlementsResponses, ListStaffData, ListStaffResponses, ListStockCountsData, ListStockCountsResponses, ListStockItemsData, ListStockItemsResponses, ListTaxRatesData, ListTaxRatesResponses, ListTenants2Data, ListTenants2Responses, ListTenantsData, ListTenantsResponses, ListUsersData, ListUsersResponses, MeData, MeErrors, MeResponses, PasskeyLoginFinishData, PasskeyLoginFinishErrors, PasskeyLoginFinishResponses, PasskeyLoginStartData, PasskeyLoginStartErrors, PasskeyLoginStartResponses, PasskeyRegisterFinishData, PasskeyRegisterFinishErrors, PasskeyRegisterFinishResponses, PasskeyRegisterStartData, PasskeyRegisterStartErrors, PasskeyRegisterStartResponses, ProvisionTenantData, ProvisionTenantResponses, RemoveCredentialData, RemoveCredentialErrors, RemoveCredentialResponses, RemoveUserData, RemoveUserErrors, RemoveUserResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, RevokeApiTokenData, RevokeApiTokenErrors, RevokeApiTokenResponses, SearchAddressesData, SearchAddressesResponses, SetBundleSlotOptionsData, SetBundleSlotOptionsResponses, SetCredentialData, SetCredentialErrors, SetCredentialResponses, SetItemAllergensData, SetItemAllergensResponses, SetItemModifierGroupsData, SetItemModifierGroupsResponses, SetLocationOverrideData, SetLocationOverrideResponses, SetMenuItemsData, SetMenuItemsResponses, SignInData, SignInErrors, SignInResponses, SignOutData, SignOutErrors, SignOutResponses, SignUpData, SignUpErrors, SignUpResponses, UpdateBrandingData, UpdateBrandingResponses, UpdateBundleSlotData, UpdateBundleSlotErrors, UpdateBundleSlotResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateDeviceData, UpdateDeviceErrors, UpdateDeviceResponses, UpdateItemData, UpdateItemErrors, UpdateItemResponses, UpdateLocationData, UpdateLocationErrors, UpdateLocationResponses, UpdateMenuData, UpdateMenuErrors, UpdateMenuResponses, UpdateModifierData, UpdateModifierErrors, UpdateModifierGroupData, UpdateModifierGroupErrors, UpdateModifierGroupResponses, UpdateModifierResponses, UpdatePlanData, UpdatePlanErrors, UpdatePlanResponses, UpdateRegisterData, UpdateRegisterErrors, UpdateRegisterResponses, UpdateSettlementStatusData, UpdateSettlementStatusErrors, UpdateSettlementStatusResponses, UpdateStaffData, UpdateStaffErrors, UpdateStaffResponses, UpdateStockCountData, UpdateStockCountErrors, UpdateStockCountResponses, UpdateStockItemData, UpdateStockItemErrors, UpdateStockItemResponses, UpdateTaxRateData, UpdateTaxRateErrors, UpdateTaxRateResponses, UpdateTenantData, UpdateTenantErrors, UpdateTenantResponses, UploadItemImageData, UploadItemImageErrors, UploadItemImageResponses, UpsertCountLineData, UpsertCountLineResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,6 +19,58 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 export const searchAddresses = <ThrowOnError extends boolean = false>(options: Options<SearchAddressesData, ThrowOnError>) => (options.client ?? client).get<SearchAddressesResponses, unknown, ThrowOnError>({ url: '/api/addresses/search', ...options });
+
+export const createAgreement = <ThrowOnError extends boolean = false>(options: Options<CreateAgreementData, ThrowOnError>) => (options.client ?? client).post<CreateAgreementResponses, CreateAgreementErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/admin/reseller-agreements',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listAgreements = <ThrowOnError extends boolean = false>(options: Options<ListAgreementsData, ThrowOnError>) => (options.client ?? client).get<ListAgreementsResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/admin/resellers/{reseller_id}/agreements',
+    ...options
+});
+
+export const computeSettlementHandler = <ThrowOnError extends boolean = false>(options: Options<ComputeSettlementHandlerData, ThrowOnError>) => (options.client ?? client).post<ComputeSettlementHandlerResponses, ComputeSettlementHandlerErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/admin/settlements/compute',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const updateSettlementStatus = <ThrowOnError extends boolean = false>(options: Options<UpdateSettlementStatusData, ThrowOnError>) => (options.client ?? client).put<UpdateSettlementStatusResponses, UpdateSettlementStatusErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/admin/settlements/{id}/status',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 export const listAllergens = <ThrowOnError extends boolean = false>(options?: Options<ListAllergensData, ThrowOnError>) => (options?.client ?? client).get<ListAllergensResponses, unknown, ThrowOnError>({
     security: [{
@@ -853,6 +905,54 @@ export const updateModifier = <ThrowOnError extends boolean = false>(options: Op
     }
 });
 
+export const listPlans = <ThrowOnError extends boolean = false>(options?: Options<ListPlansData, ThrowOnError>) => (options?.client ?? client).get<ListPlansResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans',
+    ...options
+});
+
+export const createPlan = <ThrowOnError extends boolean = false>(options: Options<CreatePlanData, ThrowOnError>) => (options.client ?? client).post<CreatePlanResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/plans',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getPlan = <ThrowOnError extends boolean = false>(options: Options<GetPlanData, ThrowOnError>) => (options.client ?? client).get<GetPlanResponses, GetPlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans/{id}',
+    ...options
+});
+
+export const updatePlan = <ThrowOnError extends boolean = false>(options: Options<UpdatePlanData, ThrowOnError>) => (options.client ?? client).put<UpdatePlanResponses, UpdatePlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/plans/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
 export const listRegisters = <ThrowOnError extends boolean = false>(options?: Options<ListRegistersData, ThrowOnError>) => (options?.client ?? client).get<ListRegistersResponses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
@@ -899,6 +999,152 @@ export const updateRegister = <ThrowOnError extends boolean = false>(options: Op
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+export const getResellerAgreement = <ThrowOnError extends boolean = false>(options?: Options<GetResellerAgreementData, ThrowOnError>) => (options?.client ?? client).get<GetResellerAgreementResponses, GetResellerAgreementErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/agreement',
+    ...options
+});
+
+export const getBranding = <ThrowOnError extends boolean = false>(options?: Options<GetBrandingData, ThrowOnError>) => (options?.client ?? client).get<GetBrandingResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/branding',
+    ...options
+});
+
+export const updateBranding = <ThrowOnError extends boolean = false>(options: Options<UpdateBrandingData, ThrowOnError>) => (options.client ?? client).put<UpdateBrandingResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/branding',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listResellerPlans = <ThrowOnError extends boolean = false>(options?: Options<ListResellerPlansData, ThrowOnError>) => (options?.client ?? client).get<ListResellerPlansResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/plans',
+    ...options
+});
+
+export const listResellerSettlements = <ThrowOnError extends boolean = false>(options?: Options<ListResellerSettlementsData, ThrowOnError>) => (options?.client ?? client).get<ListResellerSettlementsResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/settlements',
+    ...options
+});
+
+export const getResellerSettlement = <ThrowOnError extends boolean = false>(options: Options<GetResellerSettlementData, ThrowOnError>) => (options.client ?? client).get<GetResellerSettlementResponses, GetResellerSettlementErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/settlements/{id}',
+    ...options
+});
+
+export const getResellerSettlementLines = <ThrowOnError extends boolean = false>(options: Options<GetResellerSettlementLinesData, ThrowOnError>) => (options.client ?? client).get<GetResellerSettlementLinesResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/settlements/{id}/lines',
+    ...options
+});
+
+export const listTenants = <ThrowOnError extends boolean = false>(options?: Options<ListTenantsData, ThrowOnError>) => (options?.client ?? client).get<ListTenantsResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/tenants',
+    ...options
+});
+
+export const provisionTenant = <ThrowOnError extends boolean = false>(options: Options<ProvisionTenantData, ThrowOnError>) => (options.client ?? client).post<ProvisionTenantResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/tenants',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const assignResellerTenantPlan = <ThrowOnError extends boolean = false>(options: Options<AssignResellerTenantPlanData, ThrowOnError>) => (options.client ?? client).put<AssignResellerTenantPlanResponses, AssignResellerTenantPlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/tenants/{tenant_id}/plan',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listUsers = <ThrowOnError extends boolean = false>(options?: Options<ListUsersData, ThrowOnError>) => (options?.client ?? client).get<ListUsersResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/users',
+    ...options
+});
+
+export const addUser = <ThrowOnError extends boolean = false>(options: Options<AddUserData, ThrowOnError>) => (options.client ?? client).post<AddUserResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const removeUser = <ThrowOnError extends boolean = false>(options: Options<RemoveUserData, ThrowOnError>) => (options.client ?? client).delete<RemoveUserResponses, RemoveUserErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/reseller/users/{user_id}',
+    ...options
 });
 
 export const listStaff = <ThrowOnError extends boolean = false>(options?: Options<ListStaffData, ThrowOnError>) => (options?.client ?? client).get<ListStaffResponses, unknown, ThrowOnError>({
@@ -1275,7 +1521,7 @@ export const forwardTraces = <ThrowOnError extends boolean = false>(options: Opt
     }
 });
 
-export const listTenants = <ThrowOnError extends boolean = false>(options?: Options<ListTenantsData, ThrowOnError>) => (options?.client ?? client).get<ListTenantsResponses, unknown, ThrowOnError>({
+export const listTenants2 = <ThrowOnError extends boolean = false>(options?: Options<ListTenants2Data, ThrowOnError>) => (options?.client ?? client).get<ListTenants2Responses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'smls.sid',
@@ -1316,6 +1562,20 @@ export const updateTenant = <ThrowOnError extends boolean = false>(options: Opti
             type: 'apiKey'
         }],
     url: '/api/tenants/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const assignPlan = <ThrowOnError extends boolean = false>(options: Options<AssignPlanData, ThrowOnError>) => (options.client ?? client).put<AssignPlanResponses, AssignPlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'smls.sid',
+            type: 'apiKey'
+        }],
+    url: '/api/tenants/{tenant_id}/plan',
     ...options,
     headers: {
         'Content-Type': 'application/json',

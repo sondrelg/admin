@@ -34,7 +34,7 @@ const quickService: Template = {
 
 const retail: Template = {
 	name: "Retail / Shop",
-	taxRates: [{ name: "Standard", eatInRateBps: 2500, takeAwayRateBps: 2500, isDefault: true }],
+	taxRates: [{ name: "Standard", rateBps: 2500, takeAwayRateBps: 2500, isDefault: true }],
 	categories: [
 		{
 			name: "Beverages",

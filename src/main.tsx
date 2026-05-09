@@ -21,6 +21,10 @@ import "./styles.css";
 
 // Lazy-loaded page components
 const ApiTokensPage = lazy(() => import("~/pages/api-tokens"));
+const PlansPage = lazy(() => import("~/pages/plans"));
+const ProductsPage = lazy(() => import("~/pages/products"));
+const ResellersPage = lazy(() => import("~/pages/resellers"));
+const SettlementsPage = lazy(() => import("~/pages/settlements"));
 const DevicesPage = lazy(() => import("~/pages/devices"));
 const ForgotPasswordPage = lazy(() => import("~/pages/forgot-password"));
 const LocationsPage = lazy(() => import("~/pages/locations"));
@@ -341,6 +345,46 @@ const profileRoute = createRoute({
 	),
 });
 
+const productsRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/products",
+	component: () => (
+		<DashboardLayout title="Products">
+			<ProductsPage />
+		</DashboardLayout>
+	),
+});
+
+const plansRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/plans",
+	component: () => (
+		<DashboardLayout title="Plans">
+			<PlansPage />
+		</DashboardLayout>
+	),
+});
+
+const resellersRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/resellers",
+	component: () => (
+		<DashboardLayout title="Resellers">
+			<ResellersPage />
+		</DashboardLayout>
+	),
+});
+
+const settlementsRoute = createRoute({
+	getParentRoute: () => authedLayout,
+	path: "/settlements",
+	component: () => (
+		<DashboardLayout title="Settlements">
+			<SettlementsPage />
+		</DashboardLayout>
+	),
+});
+
 // ---------------------------------------------------------------------------
 // Router
 // ---------------------------------------------------------------------------
@@ -356,6 +400,10 @@ const routeTree = rootRoute.addChildren([
 		locationsRoute,
 		taxRatesRoute,
 		apiTokensRoute,
+		productsRoute,
+		plansRoute,
+		resellersRoute,
+		settlementsRoute,
 		profileRoute,
 		setupBusinessRoute,
 		setupStaffRoute,

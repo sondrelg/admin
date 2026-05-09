@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/solid-router";
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
-import { setTenantId } from "~/api/client";
+import { setCompanyId, setTenantId } from "~/api/client";
 import { searchAddresses } from "~/api/generated/sdk.gen";
 import type { AddressSuggestionResponse } from "~/api/generated/types.gen";
 import { apiFetch } from "~/api/request";
@@ -12,7 +12,7 @@ import { slugify } from "~/lib/slug";
 
 export default function BusinessPage() {
 	const navigate = useNavigate();
-	const { state, setTenant, setLocation, setSetupBusinessDraft, reset } = useWizard();
+	const { state, setTenant, setCompany, setLocation, setSetupBusinessDraft, reset } = useWizard();
 
 	const [businessName, setBusinessName] = createSignal(state.tenant?.name ?? "");
 	const slug = createMemo(() => slugify(businessName()));
@@ -159,9 +159,11 @@ export default function BusinessPage() {
 			// Step 1: Create tenant (skip if already created and still exists)
 			let tenantId = state.tenant?.id;
 			if (tenantId) {
-				const checkRes = await apiFetch<{ status: number }>(`/api/tenants/${tenantId}`);
-				if (checkRes.status === 404) {
-					// Tenant was deleted (e.g. DB reset) — clear stale state
+				// Verify tenant still exists AND we have access by hitting a tenant-scoped endpoint
+				setTenantId(tenantId);
+				const checkRes = await apiFetch<{ status: number }>("/api/companies");
+				if (checkRes.status === 401 || checkRes.status === 404) {
+					// Tenant was deleted or access lost (e.g. DB reset) — clear stale state
 					reset();
 					tenantId = undefined;
 				}
@@ -197,7 +199,43 @@ export default function BusinessPage() {
 			// Set tenant ID for subsequent API calls
 			setTenantId(tenantId);
 
-			// Step 2: Create location only when details are provided
+			// Step 2: Create company (skip if already created and still exists)
+			let companyId = state.company?.id;
+			if (companyId) {
+				const checkRes = await apiFetch<{ status: number }>(`/api/companies/${companyId}`);
+				if (checkRes.status === 404) {
+					companyId = undefined;
+				}
+			}
+			if (!companyId) {
+				const companyRes = await apiFetch<{
+					data: { id: string; name: string; error?: string; message?: string };
+					status: number;
+				}>("/api/companies", {
+					method: "POST",
+					body: JSON.stringify({
+						name: businessName(),
+						org_number: orgNumber() || undefined,
+						country: "NO",
+						currency: "NOK",
+					}),
+				});
+
+				if (companyRes.status !== 201) {
+					setError(
+						companyRes.data?.error ?? companyRes.data?.message ?? "Failed to create company",
+					);
+					return;
+				}
+
+				companyId = companyRes.data.id;
+				setCompany({ id: companyId, name: companyRes.data.name });
+			}
+
+			// Set company ID for subsequent API calls
+			setCompanyId(companyId);
+
+			// Step 3: Create location only when details are provided
 			if (!state.location && locationFieldsStarted()) {
 				const locRes = await apiFetch<{
 					data: { id: string; name: string; error?: string; message?: string };
@@ -209,7 +247,6 @@ export default function BusinessPage() {
 						address: address(),
 						city: city(),
 						postal_code: postalCode(),
-						org_number: orgNumber() || undefined,
 						coordinates: coordinates(),
 					}),
 				});

@@ -5,6 +5,7 @@ export interface MenuItem {
 	price_minor_unit: number;
 	category_id: string | null;
 	tax_rate_id: string | null;
+	product_id: string | null;
 	is_enabled: boolean;
 	sku: string | null;
 	display_order: number;

@@ -1,4 +1,10 @@
-import { getTenantHeaderName, getTenantId, resolveApiUrl } from "./client";
+import {
+	getCompanyHeaderName,
+	getCompanyId,
+	getTenantHeaderName,
+	getTenantId,
+	resolveApiUrl,
+} from "./client";
 
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 	const fullUrl = resolveApiUrl(url);
@@ -11,6 +17,11 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
 	const tenantId = getTenantId();
 	if (tenantId) {
 		headers.set(getTenantHeaderName(), tenantId);
+	}
+
+	const companyId = getCompanyId();
+	if (companyId) {
+		headers.set(getCompanyHeaderName(), companyId);
 	}
 
 	try {

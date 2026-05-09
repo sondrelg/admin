@@ -1,10 +1,12 @@
 export const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 const TENANT_HEADER = "X-Tenant-ID";
+const COMPANY_HEADER = "X-Company-ID";
 const IDEMPOTENCY_HEADER = "Idempotency-Key";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 let currentTenantId: string | null = null;
+let currentCompanyId: string | null = null;
 
 export function setTenantId(id: string | null) {
 	currentTenantId = id;
@@ -12,6 +14,14 @@ export function setTenantId(id: string | null) {
 
 export function getTenantId(): string | null {
 	return currentTenantId;
+}
+
+export function setCompanyId(id: string | null) {
+	currentCompanyId = id;
+}
+
+export function getCompanyId(): string | null {
+	return currentCompanyId;
 }
 
 export function resolveApiUrl(url: string): string {
@@ -24,6 +34,10 @@ export function shouldAttachIdempotencyKey(method: string, body: BodyInit | null
 
 export function getTenantHeaderName(): string {
 	return TENANT_HEADER;
+}
+
+export function getCompanyHeaderName(): string {
+	return COMPANY_HEADER;
 }
 
 export function getIdempotencyHeaderName(): string {
